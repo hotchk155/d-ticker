@@ -17114,12 +17114,12 @@ Copyright: Würth Elektronik eiSos</description>
 <part name="GND10" library="supply1" deviceset="GND" device=""/>
 <part name="GND11" library="supply1" deviceset="GND" device=""/>
 <part name="GND12" library="supply1" deviceset="GND" device=""/>
-<part name="LED1" library="led" deviceset="LED" device="3MM"/>
 <part name="LED2" library="led" deviceset="LED" device="3MM"/>
 <part name="LED3" library="led" deviceset="LED" device="3MM"/>
 <part name="LED4" library="led" deviceset="LED" device="3MM"/>
+<part name="LED5" library="led" deviceset="LED" device="3MM"/>
 <part name="R1" library="rcl" deviceset="R-EU_" device="R0805"/>
-<part name="JP1" library="pinhead" deviceset="PINHD-2X5" device=""/>
+<part name="POWER" library="pinhead" deviceset="PINHD-2X5" device=""/>
 <part name="SUPPLY2" library="supply2" deviceset="+12V" device=""/>
 <part name="GND13" library="supply1" deviceset="GND" device=""/>
 <part name="SUPPLY3" library="supply2" deviceset="+12V" device=""/>
@@ -17137,7 +17137,7 @@ Copyright: Würth Elektronik eiSos</description>
 <part name="L1" library="wuerth-elektronik" deviceset="WE-CBF" device="_0805"/>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
-<part name="LED5" library="led" deviceset="LED" device="3MM"/>
+<part name="LED1" library="led" deviceset="LED" device="3MM"/>
 <part name="R2" library="rcl" deviceset="R-EU_" device="R0805"/>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
 </parts>
@@ -17184,12 +17184,12 @@ Copyright: Würth Elektronik eiSos</description>
 <instance part="GND10" gate="1" x="-71.12" y="-35.56"/>
 <instance part="GND11" gate="1" x="-27.94" y="-2.54"/>
 <instance part="GND12" gate="1" x="-27.94" y="-50.8"/>
-<instance part="LED1" gate="G$1" x="297.18" y="101.6"/>
-<instance part="LED2" gate="G$1" x="297.18" y="88.9"/>
-<instance part="LED3" gate="G$1" x="304.8" y="86.36" rot="R180"/>
-<instance part="LED4" gate="G$1" x="304.8" y="99.06" rot="R180"/>
+<instance part="LED2" gate="G$1" x="297.18" y="101.6"/>
+<instance part="LED3" gate="G$1" x="297.18" y="88.9"/>
+<instance part="LED4" gate="G$1" x="304.8" y="86.36" rot="R180"/>
+<instance part="LED5" gate="G$1" x="304.8" y="99.06" rot="R180"/>
 <instance part="R1" gate="G$1" x="287.02" y="93.98" rot="R180"/>
-<instance part="JP1" gate="A" x="-22.86" y="177.8"/>
+<instance part="POWER" gate="A" x="-22.86" y="177.8"/>
 <instance part="SUPPLY2" gate="+12V" x="25.4" y="198.12"/>
 <instance part="GND13" gate="1" x="-33.02" y="157.48"/>
 <instance part="IC3" gate="P" x="86.36" y="25.4"/>
@@ -17209,7 +17209,7 @@ Copyright: Würth Elektronik eiSos</description>
 <instance part="GND6" gate="1" x="-88.9" y="58.42"/>
 <instance part="IC3" gate="B" x="88.9" y="-7.62"/>
 <instance part="GND7" gate="1" x="71.12" y="-15.24"/>
-<instance part="LED5" gate="G$1" x="106.68" y="71.12"/>
+<instance part="LED1" gate="G$1" x="106.68" y="71.12"/>
 <instance part="R2" gate="G$1" x="106.68" y="58.42" rot="R270"/>
 <instance part="GND8" gate="1" x="106.68" y="48.26"/>
 </instances>
@@ -17522,24 +17522,24 @@ Copyright: Würth Elektronik eiSos</description>
 <pinref part="GND10" gate="1" pin="GND"/>
 </segment>
 <segment>
-<pinref part="JP1" gate="A" pin="3"/>
+<pinref part="POWER" gate="A" pin="3"/>
 <wire x1="-25.4" y1="180.34" x2="-33.02" y2="180.34" width="0.1524" layer="91"/>
 <wire x1="-33.02" y1="180.34" x2="-33.02" y2="177.8" width="0.1524" layer="91"/>
-<pinref part="JP1" gate="A" pin="7"/>
+<pinref part="POWER" gate="A" pin="7"/>
 <wire x1="-33.02" y1="177.8" x2="-33.02" y2="175.26" width="0.1524" layer="91"/>
 <wire x1="-33.02" y1="175.26" x2="-25.4" y2="175.26" width="0.1524" layer="91"/>
-<pinref part="JP1" gate="A" pin="5"/>
+<pinref part="POWER" gate="A" pin="5"/>
 <wire x1="-25.4" y1="177.8" x2="-33.02" y2="177.8" width="0.1524" layer="91"/>
 <junction x="-33.02" y="177.8"/>
 <wire x1="-33.02" y1="175.26" x2="-33.02" y2="165.1" width="0.1524" layer="91"/>
 <junction x="-33.02" y="175.26"/>
-<pinref part="JP1" gate="A" pin="4"/>
+<pinref part="POWER" gate="A" pin="4"/>
 <wire x1="-17.78" y1="180.34" x2="-10.16" y2="180.34" width="0.1524" layer="91"/>
 <wire x1="-10.16" y1="180.34" x2="-10.16" y2="177.8" width="0.1524" layer="91"/>
-<pinref part="JP1" gate="A" pin="8"/>
+<pinref part="POWER" gate="A" pin="8"/>
 <wire x1="-10.16" y1="177.8" x2="-10.16" y2="175.26" width="0.1524" layer="91"/>
 <wire x1="-10.16" y1="175.26" x2="-17.78" y2="175.26" width="0.1524" layer="91"/>
-<pinref part="JP1" gate="A" pin="6"/>
+<pinref part="POWER" gate="A" pin="6"/>
 <wire x1="-17.78" y1="177.8" x2="-10.16" y2="177.8" width="0.1524" layer="91"/>
 <junction x="-10.16" y="177.8"/>
 <wire x1="-33.02" y1="165.1" x2="-10.16" y2="165.1" width="0.1524" layer="91"/>
@@ -17629,9 +17629,9 @@ Copyright: Würth Elektronik eiSos</description>
 </net>
 <net name="LED1" class="0">
 <segment>
-<pinref part="LED1" gate="G$1" pin="A"/>
+<pinref part="LED2" gate="G$1" pin="A"/>
 <wire x1="297.18" y1="109.22" x2="297.18" y2="104.14" width="0.1524" layer="91"/>
-<pinref part="LED4" gate="G$1" pin="C"/>
+<pinref part="LED5" gate="G$1" pin="C"/>
 <wire x1="304.8" y1="104.14" x2="304.8" y2="109.22" width="0.1524" layer="91"/>
 <wire x1="304.8" y1="109.22" x2="297.18" y2="109.22" width="0.1524" layer="91"/>
 <wire x1="297.18" y1="109.22" x2="276.86" y2="109.22" width="0.1524" layer="91"/>
@@ -17651,16 +17651,16 @@ Copyright: Würth Elektronik eiSos</description>
 <net name="N$14" class="0">
 <segment>
 <pinref part="R1" gate="G$1" pin="1"/>
-<pinref part="LED1" gate="G$1" pin="C"/>
+<pinref part="LED2" gate="G$1" pin="C"/>
 <wire x1="292.1" y1="93.98" x2="297.18" y2="93.98" width="0.1524" layer="91"/>
 <wire x1="297.18" y1="93.98" x2="297.18" y2="96.52" width="0.1524" layer="91"/>
-<pinref part="LED4" gate="G$1" pin="A"/>
+<pinref part="LED5" gate="G$1" pin="A"/>
 <wire x1="297.18" y1="93.98" x2="304.8" y2="93.98" width="0.1524" layer="91"/>
 <wire x1="304.8" y1="93.98" x2="304.8" y2="96.52" width="0.1524" layer="91"/>
 <junction x="297.18" y="93.98"/>
-<pinref part="LED2" gate="G$1" pin="A"/>
+<pinref part="LED3" gate="G$1" pin="A"/>
 <wire x1="297.18" y1="93.98" x2="297.18" y2="91.44" width="0.1524" layer="91"/>
-<pinref part="LED3" gate="G$1" pin="C"/>
+<pinref part="LED4" gate="G$1" pin="C"/>
 <wire x1="304.8" y1="93.98" x2="304.8" y2="91.44" width="0.1524" layer="91"/>
 <junction x="304.8" y="93.98"/>
 </segment>
@@ -17679,9 +17679,9 @@ Copyright: Würth Elektronik eiSos</description>
 </net>
 <net name="LED2" class="0">
 <segment>
-<pinref part="LED2" gate="G$1" pin="C"/>
+<pinref part="LED3" gate="G$1" pin="C"/>
 <wire x1="297.18" y1="83.82" x2="297.18" y2="81.28" width="0.1524" layer="91"/>
-<pinref part="LED3" gate="G$1" pin="A"/>
+<pinref part="LED4" gate="G$1" pin="A"/>
 <wire x1="297.18" y1="81.28" x2="304.8" y2="81.28" width="0.1524" layer="91"/>
 <wire x1="304.8" y1="81.28" x2="304.8" y2="83.82" width="0.1524" layer="91"/>
 <wire x1="297.18" y1="81.28" x2="276.86" y2="81.28" width="0.1524" layer="91"/>
@@ -17726,12 +17726,12 @@ Copyright: Würth Elektronik eiSos</description>
 </net>
 <net name="N$13" class="0">
 <segment>
-<pinref part="JP1" gate="A" pin="1"/>
+<pinref part="POWER" gate="A" pin="1"/>
 <wire x1="-25.4" y1="182.88" x2="-33.02" y2="182.88" width="0.1524" layer="91"/>
 <wire x1="-33.02" y1="182.88" x2="-33.02" y2="190.5" width="0.1524" layer="91"/>
 <wire x1="-33.02" y1="190.5" x2="-10.16" y2="190.5" width="0.1524" layer="91"/>
 <wire x1="-10.16" y1="190.5" x2="-10.16" y2="182.88" width="0.1524" layer="91"/>
-<pinref part="JP1" gate="A" pin="2"/>
+<pinref part="POWER" gate="A" pin="2"/>
 <wire x1="-10.16" y1="182.88" x2="-17.78" y2="182.88" width="0.1524" layer="91"/>
 <pinref part="D1" gate="G$1" pin="A"/>
 <wire x1="-5.08" y1="190.5" x2="-10.16" y2="190.5" width="0.1524" layer="91"/>
@@ -17759,14 +17759,14 @@ Copyright: Würth Elektronik eiSos</description>
 <net name="N$9" class="0">
 <segment>
 <pinref part="R2" gate="G$1" pin="1"/>
-<pinref part="LED5" gate="G$1" pin="C"/>
+<pinref part="LED1" gate="G$1" pin="C"/>
 <wire x1="106.68" y1="63.5" x2="106.68" y2="66.04" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$12" class="0">
 <segment>
 <pinref part="IC1" gate="G$1" pin="RC3/SS#"/>
-<pinref part="LED5" gate="G$1" pin="A"/>
+<pinref part="LED1" gate="G$1" pin="A"/>
 <wire x1="121.92" y1="91.44" x2="106.68" y2="91.44" width="0.1524" layer="91"/>
 <wire x1="106.68" y1="91.44" x2="106.68" y2="73.66" width="0.1524" layer="91"/>
 </segment>
