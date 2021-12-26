@@ -1,0 +1,13 @@
+[Settings]
+Active Directory=D:\Dropbox\Dropbox\Github\timetwister\firmware\
+Target=PIC16F1825
+Active Compiler=BoostC
+Active Config=Debug
+Config=1
+Last Ext=h
+[Files]
+Count=4
+File0=tan.h
+File1=timetwister.c
+File2=uart_debug.c
+File3=uart_debug.h

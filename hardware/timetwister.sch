@@ -17639,13 +17639,9 @@ Copyright: Würth Elektronik eiSos</description>
 <label x="274.32" y="109.22" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="IC1" gate="G$1" pin="RA0/ICSPDAT"/>
-<pinref part="ICSP" gate="G$1" pin="ICSP_DAT/PGD"/>
-<wire x1="165.1" y1="104.14" x2="177.8" y2="104.14" width="0.1524" layer="91"/>
-<wire x1="177.8" y1="104.14" x2="187.96" y2="104.14" width="0.1524" layer="91"/>
-<wire x1="177.8" y1="104.14" x2="177.8" y2="116.84" width="0.1524" layer="91"/>
-<junction x="177.8" y="104.14"/>
-<label x="177.8" y="116.84" size="1.778" layer="95" rot="R90"/>
+<pinref part="IC1" gate="G$1" pin="RA5"/>
+<wire x1="121.92" y1="104.14" x2="109.22" y2="104.14" width="0.1524" layer="91"/>
+<label x="106.68" y="104.14" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$14" class="0">
@@ -17672,9 +17668,13 @@ Copyright: Würth Elektronik eiSos</description>
 <label x="274.32" y="93.98" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="IC1" gate="G$1" pin="RA5"/>
-<wire x1="121.92" y1="104.14" x2="109.22" y2="104.14" width="0.1524" layer="91"/>
-<label x="106.68" y="104.14" size="1.778" layer="95"/>
+<pinref part="IC1" gate="G$1" pin="RA0/ICSPDAT"/>
+<pinref part="ICSP" gate="G$1" pin="ICSP_DAT/PGD"/>
+<wire x1="165.1" y1="104.14" x2="177.8" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="177.8" y1="104.14" x2="187.96" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="177.8" y1="104.14" x2="177.8" y2="116.84" width="0.1524" layer="91"/>
+<junction x="177.8" y="104.14"/>
+<label x="177.8" y="116.84" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="LED2" class="0">
@@ -17689,13 +17689,9 @@ Copyright: Würth Elektronik eiSos</description>
 <label x="274.32" y="81.28" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="ICSP" gate="G$1" pin="ICSP_CLK/PGC"/>
-<pinref part="IC1" gate="G$1" pin="RA1/ICPCLK"/>
-<wire x1="187.96" y1="101.6" x2="180.34" y2="101.6" width="0.1524" layer="91"/>
-<wire x1="180.34" y1="101.6" x2="165.1" y2="101.6" width="0.1524" layer="91"/>
-<wire x1="180.34" y1="101.6" x2="180.34" y2="116.84" width="0.1524" layer="91"/>
-<junction x="180.34" y="101.6"/>
-<label x="182.88" y="116.84" size="1.778" layer="95" rot="R90"/>
+<pinref part="IC1" gate="G$1" pin="RC3/SS#"/>
+<wire x1="121.92" y1="91.44" x2="106.68" y2="91.44" width="0.1524" layer="91"/>
+<label x="106.68" y="91.44" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="+12V" class="0">
@@ -17763,53 +17759,61 @@ Copyright: Würth Elektronik eiSos</description>
 <wire x1="106.68" y1="63.5" x2="106.68" y2="66.04" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$12" class="0">
+<net name="LED0" class="0">
 <segment>
-<pinref part="IC1" gate="G$1" pin="RC3/SS#"/>
 <pinref part="LED1" gate="G$1" pin="A"/>
-<wire x1="121.92" y1="91.44" x2="106.68" y2="91.44" width="0.1524" layer="91"/>
-<wire x1="106.68" y1="91.44" x2="106.68" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="106.68" y1="81.28" x2="106.68" y2="73.66" width="0.1524" layer="91"/>
+<label x="104.14" y="81.28" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="ICSP" gate="G$1" pin="ICSP_CLK/PGC"/>
+<pinref part="IC1" gate="G$1" pin="RA1/ICPCLK"/>
+<wire x1="187.96" y1="101.6" x2="180.34" y2="101.6" width="0.1524" layer="91"/>
+<wire x1="180.34" y1="101.6" x2="165.1" y2="101.6" width="0.1524" layer="91"/>
+<wire x1="180.34" y1="101.6" x2="180.34" y2="116.84" width="0.1524" layer="91"/>
+<junction x="180.34" y="101.6"/>
+<label x="182.88" y="116.84" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 </nets>
 </sheet>
 </sheets>
 <errors>
-<approved hash="104,1,121.92,106.68,U$1,VDD,VCC,,,"/>
-<approved hash="104,1,165.1,106.68,U$1,VSS,GND,,,"/>
-<approved hash="104,1,86.36,33.02,IC1P,V+,+12V,,,"/>
-<approved hash="104,1,86.36,17.78,IC1P,V-,GND,,,"/>
-<approved hash="104,1,187.96,109.22,J1,VDD,VCC,,,"/>
-<approved hash="104,1,187.96,106.68,J1,VSS(GND),GND,,,"/>
-<approved hash="113,1,-87.2287,82.55,C1,,,,,"/>
-<approved hash="113,1,-43.18,26.3948,R1,,,,,"/>
-<approved hash="113,1,-33.6465,25.6963,T1,,,,,"/>
-<approved hash="113,1,-28.9348,10.16,R2,,,,,"/>
-<approved hash="113,1,-33.6465,-22.5637,T2,,,,,"/>
-<approved hash="113,1,-43.18,-21.8652,R3,,,,,"/>
-<approved hash="113,1,-28.9348,-38.1,R4,,,,,"/>
-<approved hash="113,1,68.58,13.6948,R5,,,,,"/>
-<approved hash="113,1,93.98,13.6948,R6,,,,,"/>
-<approved hash="113,1,109.22,26.3948,R9,,,,,"/>
-<approved hash="113,1,121.051,16.51,C2,,,,,"/>
+<approved hash="104,1,121.92,106.68,IC1,VDD,VCC,,,"/>
+<approved hash="104,1,165.1,106.68,IC1,VSS,GND,,,"/>
+<approved hash="104,1,86.36,33.02,IC3P,V+,+12V,,,"/>
+<approved hash="104,1,86.36,17.78,IC3P,V-,GND,,,"/>
+<approved hash="104,1,187.96,109.22,ICSP,VDD,VCC,,,"/>
+<approved hash="104,1,187.96,106.68,ICSP,VSS(GND),GND,,,"/>
+<approved hash="113,1,-87.2287,82.55,C2,,,,,"/>
+<approved hash="113,1,-43.18,26.3948,R3,,,,,"/>
+<approved hash="113,1,-33.6465,25.6963,Q1,,,,,"/>
+<approved hash="113,1,-28.9348,10.16,R4,,,,,"/>
+<approved hash="113,1,-33.6465,-22.5637,Q2,,,,,"/>
+<approved hash="113,1,-43.18,-21.8652,R8,,,,,"/>
+<approved hash="113,1,-28.9348,-38.1,C7,,,,,"/>
+<approved hash="113,1,68.58,13.6948,R6,,,,,"/>
+<approved hash="113,1,93.98,13.6948,R5,,,,,"/>
+<approved hash="113,1,109.22,26.3948,R7,,,,,"/>
+<approved hash="113,1,121.051,16.51,C5,,,,,"/>
 <approved hash="113,1,160.02,136.771,S1,,,,,"/>
-<approved hash="113,1,196.66,105.41,J1,,,,,"/>
-<approved hash="113,1,140.97,115.971,C4,,,,,"/>
-<approved hash="113,1,297.502,100.33,LED1,,,,,"/>
-<approved hash="113,1,297.502,87.63,LED2,,,,,"/>
-<approved hash="113,1,304.478,87.63,LED3,,,,,"/>
-<approved hash="113,1,304.478,100.33,LED4,,,,,"/>
-<approved hash="113,1,287.02,92.9852,R12,,,,,"/>
-<approved hash="113,1,-21.6323,179.201,JP1,,,,,"/>
-<approved hash="113,1,92.71,39.7713,C5,,,,,"/>
-<approved hash="113,1,40.64,187.156,U1,,,,,"/>
-<approved hash="113,1,32.1513,184.15,C6,,,,,"/>
-<approved hash="113,1,52.4713,184.15,C7,,,,,"/>
+<approved hash="113,1,196.66,105.41,ICSP,,,,,"/>
+<approved hash="113,1,140.97,115.971,C1,,,,,"/>
+<approved hash="113,1,297.502,100.33,LED2,,,,,"/>
+<approved hash="113,1,297.502,87.63,LED3,,,,,"/>
+<approved hash="113,1,304.478,87.63,LED4,,,,,"/>
+<approved hash="113,1,304.478,100.33,LED5,,,,,"/>
+<approved hash="113,1,287.02,92.9852,R1,,,,,"/>
+<approved hash="113,1,-21.6323,179.201,POWER,,,,,"/>
+<approved hash="113,1,92.71,39.7713,C6,,,,,"/>
+<approved hash="113,1,40.64,187.156,IC2,,,,,"/>
+<approved hash="113,1,32.1513,184.15,C3,,,,,"/>
+<approved hash="113,1,52.4713,184.15,C4,,,,,"/>
 <approved hash="113,1,26.758,184.15,C8,,,,,"/>
 <approved hash="113,1,57.238,184.15,C9,,,,,"/>
 <approved hash="113,1,12.7,191.431,L1,,,,,"/>
-<approved hash="113,1,107.002,69.85,LED5,,,,,"/>
-<approved hash="113,1,107.675,58.42,R7,,,,,"/>
+<approved hash="113,1,107.002,69.85,LED1,,,,,"/>
+<approved hash="113,1,107.675,58.42,R2,,,,,"/>
 </errors>
 </schematic>
 </drawing>
