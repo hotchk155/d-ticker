@@ -65,3 +65,5 @@ Desktop.ini
 *.tree
 makefile.*
 MIDI-Hub.hex
+hardware/d-ticker_drills.txt
+hardware/d-ticker_drills_NPTH.txt
