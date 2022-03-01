@@ -2251,7 +2251,7 @@ design rules under a new name.</description>
 <element name="D2" library="jasons_stuff" package="0805DIODE" value="0805DIODE" x="11.176" y="24.384" smashed="yes" rot="MR0">
 <attribute name="NAME" x="12.5808" y="25.738" size="1.27" layer="26" font="vector" ratio="20" rot="MR0"/>
 </element>
-<element name="R3" library="rcl" package="R0805" value="" x="11.176" y="21.844" smashed="yes" rot="MR0">
+<element name="R3" library="rcl" package="R0805" value="1k" x="11.176" y="21.844" smashed="yes" rot="MR0">
 <attribute name="NAME" x="12.7" y="19.304" size="1.27" layer="26" font="vector" ratio="20" rot="MR0"/>
 <attribute name="VALUE" x="11.811" y="19.304" size="1.27" layer="28" rot="MR0"/>
 </element>
@@ -2259,7 +2259,7 @@ design rules under a new name.</description>
 <attribute name="NAME" x="7.62" y="19.812" size="1.27" layer="26" font="vector" ratio="20" rot="MR0"/>
 <attribute name="VALUE" x="3.556" y="21.082" size="1.27" layer="28" rot="MR90"/>
 </element>
-<element name="R4" library="rcl" package="R0805" value="" x="5.588" y="27.305" smashed="yes" rot="MR270">
+<element name="R4" library="rcl" package="R0805" value="4k7" x="5.588" y="27.305" smashed="yes" rot="MR270">
 <attribute name="NAME" x="4.318" y="30.861" size="1.27" layer="26" font="vector" ratio="20" rot="MR180"/>
 <attribute name="VALUE" x="8.128" y="27.94" size="1.27" layer="28" rot="MR270"/>
 </element>
@@ -2267,11 +2267,11 @@ design rules under a new name.</description>
 <attribute name="NAME" x="8.763" y="4.572" size="1.27" layer="26" font="vector" ratio="20" rot="MR270"/>
 <attribute name="VALUE" x="3.81" y="5.715" size="1.27" layer="28" rot="MR180"/>
 </element>
-<element name="R8" library="rcl" package="R0805" value="" x="5.715" y="5.715" smashed="yes" rot="MR0">
+<element name="R8" library="rcl" package="R0805" value="1k" x="5.715" y="5.715" smashed="yes" rot="MR0">
 <attribute name="NAME" x="8.89" y="6.985" size="1.27" layer="26" font="vector" ratio="20" rot="MR270"/>
 <attribute name="VALUE" x="6.35" y="3.175" size="1.27" layer="28" rot="MR0"/>
 </element>
-<element name="C7" library="rcl" package="R0805" value="" x="5.715" y="10.795" smashed="yes" rot="MR0">
+<element name="R9" library="rcl" package="R0805" value="4k7" x="5.715" y="10.795" smashed="yes" rot="MR0">
 <attribute name="NAME" x="6.35" y="12.065" size="1.27" layer="26" font="vector" ratio="20" rot="MR0"/>
 <attribute name="VALUE" x="6.35" y="8.255" size="1.27" layer="28" rot="MR0"/>
 </element>
@@ -2281,19 +2281,19 @@ design rules under a new name.</description>
 <element name="IC3" library="linear" package="SO08" value="LM358D" x="13.843" y="6.731" smashed="yes" rot="MR180">
 <attribute name="NAME" x="11.811" y="13.462" size="1.27" layer="26" font="vector" ratio="20" rot="MR180"/>
 </element>
-<element name="R6" library="rcl" package="R0805" value="" x="18.669" y="6.477" smashed="yes" rot="MR270">
+<element name="R6" library="rcl" package="R0805" value="10k" x="18.669" y="6.477" smashed="yes" rot="MR270">
 <attribute name="NAME" x="19.939" y="10.795" size="1.27" layer="26" font="vector" ratio="20" rot="MR270"/>
 <attribute name="VALUE" x="21.209" y="7.112" size="1.27" layer="28" rot="MR270"/>
 </element>
-<element name="R5" library="rcl" package="R0805" value="" x="21.336" y="6.604" smashed="yes" rot="MR270">
+<element name="R5" library="rcl" package="R0805" value="10k" x="21.336" y="6.604" smashed="yes" rot="MR270">
 <attribute name="NAME" x="22.479" y="10.922" size="1.27" layer="26" font="vector" ratio="20" rot="MR270"/>
 <attribute name="VALUE" x="23.876" y="7.239" size="1.27" layer="28" rot="MR270"/>
 </element>
-<element name="R7" library="rcl" package="R0805" value="" x="21.336" y="2.286" smashed="yes" rot="MR270">
+<element name="R7" library="rcl" package="R0805" value="1k" x="21.336" y="2.286" smashed="yes" rot="MR270">
 <attribute name="NAME" x="17.653" y="3.81" size="1.27" layer="26" font="vector" ratio="20" rot="MR180"/>
 <attribute name="VALUE" x="23.876" y="2.921" size="1.27" layer="28" rot="MR270"/>
 </element>
-<element name="C5" library="rcl" package="C0805" value="" x="13.97" y="1.27" smashed="yes" rot="MR0">
+<element name="C5" library="rcl" package="C0805" value="10n" x="13.97" y="1.27" smashed="yes" rot="MR0">
 <attribute name="NAME" x="9.779" y="1.524" size="1.27" layer="26" font="vector" ratio="20" rot="MR180"/>
 <attribute name="VALUE" x="15.24" y="-1.27" size="1.27" layer="28" rot="MR0"/>
 </element>
@@ -2535,7 +2535,7 @@ design rules under a new name.</description>
 </signal>
 <signal name="RESET_IN">
 <contactref element="Q2" pad="E"/>
-<contactref element="C7" pad="2"/>
+<contactref element="R9" pad="2"/>
 <contactref element="IC1" pad="3"/>
 <wire x1="6.665" y1="3.64" x2="6.665" y2="1.59" width="0.3048" layer="16"/>
 <wire x1="6.665" y1="1.59" x2="7.112" y2="1.143" width="0.3048" layer="16"/>
@@ -2654,7 +2654,7 @@ design rules under a new name.</description>
 <contactref element="R6" pad="1"/>
 <contactref element="C5" pad="2"/>
 <contactref element="CLK_OUT" pad="P$3"/>
-<contactref element="C7" pad="1"/>
+<contactref element="R9" pad="1"/>
 <contactref element="R4" pad="1"/>
 <contactref element="CLK_IN" pad="P$3"/>
 <contactref element="RST_IN" pad="P$3"/>

@@ -42,6 +42,7 @@ RC2	POT1	AN6
 
 #define T_LED1 trisa.5
 #define T_LED2 trisc.3
+#define T_LEDCOM trisa.0
 
 
 //               76543210
@@ -190,26 +191,31 @@ void recalc() {
 void set_led(int i) {
 	T_LED1 = 1;
 	T_LED2 = 1;
+	T_LEDCOM = 1;
 	switch(i) {
-		case 3:
+		case 0:
 			P_LED1 = 1;
 			P_LEDCOM = 0;
 			T_LED1 = 0;
+			T_LEDCOM = 0;
 			break;
-		case 2:
+		case 1:
 			P_LED2 = 0;
 			P_LEDCOM = 1;
 			T_LED2 = 0;
+			T_LEDCOM = 0;
 			break;
-		case 1:
+		case 2:
 			P_LED2 = 1;
 			P_LEDCOM = 0;
 			T_LED2 = 0;
+			T_LEDCOM = 0;
 			break;
-		case 0:
+		case 3:
 			P_LED1 = 0;
 			P_LEDCOM = 1;
 			T_LED1 = 0;
+			T_LEDCOM = 0;
 			break;
 	}
 }
@@ -237,6 +243,12 @@ int get_adc(int i) {
 	return adresh;
 }
 
+void test_pots() {
+	for(;;) {
+		int j = get_adc(3);
+		set_led(j/64);
+	}
+}
 
 	
 // MAIN
@@ -298,6 +310,8 @@ void main()
 	// enable interrupts	
 	intcon.7 = 1; //GIE
 	intcon.6 = 1; //PEIE
+	
+	test_pots();
 /*	
 while(1) {
 		//uart_send_string("poop\r\n");
@@ -389,7 +403,6 @@ for(int i=0; i<128; ++i) {
 		else if(n == K_NONE) {
 			key = K_NONE;
 		}
-		*/
 		if(get_adc(q) > 127) {
 			set_led(q);
 		}
@@ -397,5 +410,7 @@ for(int i=0; i<128; ++i) {
 			set_led(-1);
 		}
 		if(++q>3)q=0;		
+*/
+				
 	}
 }

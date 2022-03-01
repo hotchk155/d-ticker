@@ -17087,20 +17087,20 @@ Copyright: Würth Elektronik eiSos</description>
 <part name="CLK_OUT" library="thonkiconn" deviceset="WQP-PJ301M-12_JACK" device=""/>
 <part name="RST_IN" library="thonkiconn" deviceset="WQP-PJ301M-12_JACK" device=""/>
 <part name="D2" library="jasons_stuff" deviceset="0805DIODE" device=""/>
-<part name="R3" library="rcl" deviceset="R-EU_" device="R0805"/>
+<part name="R3" library="rcl" deviceset="R-EU_" device="R0805" value="1k"/>
 <part name="Q1" library="transistor-neu-to92" deviceset="*-NPN-" device="SOT23-BEC" technology="MMBT3904LT1"/>
-<part name="R4" library="rcl" deviceset="R-EU_" device="R0805"/>
+<part name="R4" library="rcl" deviceset="R-EU_" device="R0805" value="4k7"/>
 <part name="P+2" library="supply1" deviceset="VCC" device=""/>
 <part name="Q2" library="transistor-neu-to92" deviceset="*-NPN-" device="SOT23-BEC" technology="MMBT3904LT1"/>
-<part name="R8" library="rcl" deviceset="R-EU_" device="R0805"/>
-<part name="C7" library="rcl" deviceset="R-EU_" device="R0805"/>
+<part name="R8" library="rcl" deviceset="R-EU_" device="R0805" value="1k"/>
+<part name="R9" library="rcl" deviceset="R-EU_" device="R0805" value="4k7"/>
 <part name="P+3" library="supply1" deviceset="VCC" device=""/>
 <part name="D3" library="jasons_stuff" deviceset="0805DIODE" device=""/>
 <part name="IC3" library="linear" deviceset="LM358" device="D"/>
-<part name="R6" library="rcl" deviceset="R-EU_" device="R0805"/>
-<part name="R5" library="rcl" deviceset="R-EU_" device="R0805"/>
-<part name="R7" library="rcl" deviceset="R-EU_" device="R0805"/>
-<part name="C5" library="rcl" deviceset="C-EU" device="C0805"/>
+<part name="R6" library="rcl" deviceset="R-EU_" device="R0805" value="10k"/>
+<part name="R5" library="rcl" deviceset="R-EU_" device="R0805" value="10k"/>
+<part name="R7" library="rcl" deviceset="R-EU_" device="R0805" value="1k"/>
+<part name="C5" library="rcl" deviceset="C-EU" device="C0805" value="10n"/>
 <part name="S1" library="switch-omron" deviceset="10-XX" device=""/>
 <part name="ICSP" library="tag-connect" deviceset="TC2030" device="-MCP-NL"/>
 <part name="C1" library="rcl" deviceset="C-EU" device="C0805"/>
@@ -17171,7 +17171,7 @@ Copyright: Würth Elektronik eiSos</description>
 <instance part="P+2" gate="VCC" x="-7.62" y="48.26"/>
 <instance part="Q2" gate="G$1" x="-10.16" y="-12.7"/>
 <instance part="R8" gate="G$1" x="-22.86" y="-12.7"/>
-<instance part="C7" gate="G$1" x="-7.62" y="-27.94" rot="R90"/>
+<instance part="R9" gate="G$1" x="-7.62" y="-27.94" rot="R90"/>
 <instance part="P+3" gate="VCC" x="-7.62" y="-2.54"/>
 <instance part="D3" gate="G$1" x="-33.02" y="-12.7" rot="R270"/>
 <instance part="IC3" gate="A" x="68.58" y="48.26" rot="MR180"/>
@@ -17393,7 +17393,7 @@ Copyright: Würth Elektronik eiSos</description>
 <net name="RESET_IN" class="0">
 <segment>
 <pinref part="Q2" gate="G$1" pin="E"/>
-<pinref part="C7" gate="G$1" pin="2"/>
+<pinref part="R9" gate="G$1" pin="2"/>
 <wire x1="-7.62" y1="-17.78" x2="-7.62" y2="-20.32" width="0.1524" layer="91"/>
 <wire x1="-7.62" y1="-20.32" x2="-7.62" y2="-22.86" width="0.1524" layer="91"/>
 <wire x1="-7.62" y1="-20.32" x2="0" y2="-20.32" width="0.1524" layer="91"/>
@@ -17508,7 +17508,7 @@ Copyright: Würth Elektronik eiSos</description>
 <pinref part="GND5" gate="1" pin="GND"/>
 </segment>
 <segment>
-<pinref part="C7" gate="G$1" pin="1"/>
+<pinref part="R9" gate="G$1" pin="1"/>
 <pinref part="GND12" gate="1" pin="GND"/>
 <wire x1="-7.62" y1="-33.02" x2="-7.62" y2="-38.1" width="0.1524" layer="91"/>
 </segment>
