@@ -69,3 +69,6 @@ hardware/d-ticker_drills.txt
 hardware/d-ticker_drills_NPTH.txt
 hardware/d-ticker_v1.zip
 firmware/Debug/d-ticker.hex
+d-ticker.X/build
+d-ticker.X/dist
+docs/Backup_of_d-ticker.cdr

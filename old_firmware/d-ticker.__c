@@ -7,7 +7,7 @@ Config=1
 Last Ext=c
 [Files]
 Count=4
-File0=tan.h
-File1=uart_debug.c
-File2=uart_debug.h
-File3=d-ticker.c
+File0=d-ticker.c
+File1=tan.h
+File2=uart_debug.c
+File3=uart_debug.h

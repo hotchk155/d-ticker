@@ -15,7 +15,26 @@
 #include "uart_debug.h"
 #include "tan.h"
 
+
+
+
 /*
+
+1  VDD
+2  RA5				LED1
+3  RA4/SDO			RESET_IN	
+4  RA3/MCLR#/VPP	SWITCH
+5  RC5/RX			CLOCK_IN
+6  RC4/TX			CLOCK_OUT
+7  RC3/SS#			LED2
+8  RC2				POT1/AN6
+9  RC1/SDA/SDI		POT2/AN5
+10 RC0/SCL/SCK		POT3/AN4
+11 RA2/INT			POT4/AN2
+12 RA1/ICPCLK		LED0
+13 RA1/ICPDAT		LED_COM
+14 VSS
+
 RA2	POT4	AN2
 RC0	POT3	AN4
 RC1	POT2	AN5
@@ -32,9 +51,8 @@ RC2	POT1	AN6
 //
 //typedef unsigned char byte;
 
-#define P_LED0 lata.1
+#define P_CLOCKLED lata.1
 #define P_CLOCKOUT latc.4
-#define P_EXTCLOCK latc.5
 
 #define P_LED1 lata.5
 #define P_LED2 latc.3
@@ -44,10 +62,13 @@ RC2	POT1	AN6
 #define T_LED2 trisc.3
 #define T_LEDCOM trisa.0
 
+#define P_EXTCLOCK portc.5
+#define P_EXTRESET porta.4
+
 
 //               76543210
 #define TRIS_A 0b11111100
-#define TRIS_C 0b11000111
+#define TRIS_C 0b11100111
 
 //
 // MACRO DEFS
@@ -58,7 +79,57 @@ RC2	POT1	AN6
 volatile byte ms_tick = 0;				// once per millisecond tick flag used to synchronise stuff
 
 
+// This array contains 8-bit ADC readings of the four potentiometers
+// and it is kept updated by 
+#define NUM_POTS 4
+volatile byte pot[NUM_POTS] = {0};
+volatile int which_pot = 0;
 
+#define DEBOUNCE_CLOCK_IN 10
+volatile byte debounce_clock_in = 0;
+volatile byte prev_clock_in = 0;
+volatile byte clock_in_signal = 0;
+
+#define DEBOUNCE_RESET_IN 10
+volatile byte debounce_reset_in = 0;
+volatile byte prev_reset_in = 0;
+volatile byte reset_in_signal = 0;
+
+#define CLOCK_LED_TIMEOUT 10
+volatile byte clock_led_timeout = 0;
+
+#define SZ_TEMPO_MAP 16
+int tempo_map[SZ_TEMPO_MAP];
+
+// define the time base used for scheduling output triggers...
+// this will divide the full bar into 65536 units
+#define MAX_TICKS 0xFFFF
+typedef unsigned int TICKS;
+volatile TICKS cur_ticks = 0;
+
+// The schedule for each tick
+#define SZ_TRIG_SCHEDULE 16
+TICKS trig_schedule[SZ_TRIG_SCHEDULE];
+
+void adc_begin() {
+	switch(which_pot) {
+	case 0:
+		adcon0 = ADCON0_POT1;
+		break;
+	case 1:
+		adcon0 = ADCON0_POT2;
+		break;
+	case 2:
+		adcon0 = ADCON0_POT3;
+		break;
+	case 3:
+		adcon0 = ADCON0_POT4;
+		break;
+	default:
+		return;
+	}
+	adcon0.1 = 1;
+}
 
 ////////////////////////////////////////////////////////////
 // INTERRUPT HANDLER CALLED WHEN CHARACTER RECEIVED AT 
@@ -71,14 +142,104 @@ void interrupt( void )
 	{
 		tmr0 = TIMER_0_INIT_SCALAR;
 		ms_tick = 1;
+		
+		// poll the clock input
+		if(debounce_clock_in) {
+			--debounce_clock_in;
+		}
+		else if(P_EXTCLOCK) {
+			if(!prev_clock_in) {
+				prev_clock_in = 1;
+				clock_in_signal = 1;
+				debounce_clock_in = DEBOUNCE_CLOCK_IN;
+				
+P_CLOCKLED = 1;
+clock_led_timeout = CLOCK_LED_TIMEOUT;
+			}
+		}
+		else {
+			prev_clock_in = 0;
+		}
+		
+		// poll the reset input
+		if(debounce_reset_in) {
+			--debounce_reset_in;
+		}
+		else if(P_EXTRESET) {
+			if(!prev_reset_in) {
+				prev_reset_in = 1;
+				reset_in_signal = 1;
+				debounce_reset_in = DEBOUNCE_RESET_IN;
+			}
+		}
+		else {
+			prev_reset_in = 0;
+		}
+		
+		// manage clock LED
+		if(clock_led_timeout) {
+			if(!--clock_led_timeout) {
+				P_CLOCKLED = 0;
+			}
+		}
+		
 		intcon.2 = 0;
+	}
+	
+	// ADC reading complete
+	if(pir1.6) { 
+		pot[which_pot] = adresh;
+		if(++which_pot >= NUM_POTS) {
+			which_pot = 0;
+		}
+		pir1.6 = 0;
+		adc_begin();
 	}
 }
 
-int pot[4] = {0};
+/////////////////////////////////////////////////////////////////////////////
+// Turn on one of four LEDs by tri-stating 3 lines 
+// 1) LED1->COM
+// 2) COM->LED2
+// 3) LED2->COM
+// 4) COM->LED1
+/////////////////////////////////////////////////////////////////////////////
+void set_led(int i) {
+	T_LED1 = 1;
+	T_LED2 = 1;
+	T_LEDCOM = 1;
+	switch(i) {
+		case 0:
+			P_LED1 = 1;
+			P_LEDCOM = 0;
+			T_LED1 = 0;
+			T_LEDCOM = 0;
+			break;
+		case 1:
+			P_LED2 = 0;
+			P_LEDCOM = 1;
+			T_LED2 = 0;
+			T_LEDCOM = 0;
+			break;
+		case 2:
+			P_LED2 = 1;
+			P_LEDCOM = 0;
+			T_LED2 = 0;
+			T_LEDCOM = 0;
+			break;
+		case 3:
+			P_LED1 = 0;
+			P_LEDCOM = 1;
+			T_LED1 = 0;
+			T_LEDCOM = 0;
+			break;
+	}
+}
 
-#define SZ_TEMPO_MAP 16
-int tempo_map[SZ_TEMPO_MAP];
+
+/////////////////////////////////////////////////////////////////////////////
+// Recalculate the tempo map
+/////////////////////////////////////////////////////////////////////////////
 void recalc() {
 
 	// We read each of the four potentiometers as an 8 bit value
@@ -182,71 +343,13 @@ void recalc() {
 
 
 
-/*
-1) LED1->COM
-2) COM->LED2
-3) LED2->COM
-4) COM->LED1
-*/
-void set_led(int i) {
-	T_LED1 = 1;
-	T_LED2 = 1;
-	T_LEDCOM = 1;
-	switch(i) {
-		case 0:
-			P_LED1 = 1;
-			P_LEDCOM = 0;
-			T_LED1 = 0;
-			T_LEDCOM = 0;
-			break;
-		case 1:
-			P_LED2 = 0;
-			P_LEDCOM = 1;
-			T_LED2 = 0;
-			T_LEDCOM = 0;
-			break;
-		case 2:
-			P_LED2 = 1;
-			P_LEDCOM = 0;
-			T_LED2 = 0;
-			T_LEDCOM = 0;
-			break;
-		case 3:
-			P_LED1 = 0;
-			P_LEDCOM = 1;
-			T_LED1 = 0;
-			T_LEDCOM = 0;
-			break;
-	}
-}
 
-
-int get_adc(int i) {
-	switch(i) {
-	case 0:
-		adcon0 = ADCON0_POT1;
-		break;
-	case 1:
-		adcon0 = ADCON0_POT2;
-		break;
-	case 2:
-		adcon0 = ADCON0_POT3;
-		break;
-	case 3:
-		adcon0 = ADCON0_POT4;
-		break;
-	default:
-		return 0;
-	}
-	adcon0.1 = 1;
-	while(adcon0.1);
-	return adresh;
-}
 
 void test_pots() {
 	for(;;) {
-		int j = get_adc(3);
+		int j = pot[0];
 		set_led(j/64);
+		//set_led(0);
 	}
 }
 
@@ -305,13 +408,21 @@ void main()
 	intcon.5 = 1; 	  // enabled timer 0 interrrupt
 	intcon.2 = 0;     // clear interrupt fired flag
 
+	pir1.6 = 0;
+	pie1.6 = 1; // enable the ADC interrupt
 	
 	//uart_init();
 	// enable interrupts	
 	intcon.7 = 1; //GIE
 	intcon.6 = 1; //PEIE
+
+	// poll pots
+	adc_begin();
 	
-	test_pots();
+	for(;;) {
+	}
+	
+//	test_pots();
 /*	
 while(1) {
 		//uart_send_string("poop\r\n");
@@ -337,15 +448,15 @@ for(int i=0; i<128; ++i) {
 	for(;;)
 	{	
 //uart_send_string("pots=");		
-		for(i=0; i<4; ++i) {
-			pot[i] = 255-get_adc(i);
+		//for(i=0; i<4; ++i) {
+			//pot[i] = 255-get_adc(i);
 //uart_send_number(pot[i]);		
 //uart_send_string(" ");		
-		}
+		//}
 //uart_send_string("\r\n");		
 		recalc();
 		bbb=0;
-		P_LED0=1;
+		P_CLOCKLED=1;
 		P_EXTCLOCK=1;
 		beat_led = 20;
 		
@@ -369,13 +480,13 @@ for(int i=0; i<128; ++i) {
 					ms_tick = 0;
 					if(++bbb>125) {
 						bbb=0;
-						P_LED0=1;
+						P_CLOCKLED=1;
 						P_EXTCLOCK=1;						
 						beat_led = 20;
 					}
 					if(beat_led) {
 						if(!--beat_led) {
-							P_LED0 = 0;
+							P_CLOCKLED = 0;
 							P_EXTCLOCK=0;						
 						}
 					}

@@ -17152,6 +17152,11 @@ Copyright: Würth Elektronik eiSos</description>
 <wire x1="101.6" y1="-50.8" x2="213.36" y2="-50.8" width="0.1524" layer="97"/>
 <wire x1="213.36" y1="-50.8" x2="213.36" y2="-5.08" width="0.1524" layer="97"/>
 <wire x1="213.36" y1="-5.08" x2="101.6" y2="-5.08" width="0.1524" layer="97"/>
+<text x="86.36" y="15.24" size="6.35" layer="97">NOT TL072!</text>
+<text x="10.16" y="58.42" size="6.35" layer="97">+/- REVERSED</text>
+<text x="-35.56" y="0" size="6.35" layer="97">SCHMITT 
+TRIGGER
+INPUT</text>
 </plain>
 <instances>
 <instance part="IC1" gate="G$1" x="142.24" y="99.06"/>
@@ -17838,4 +17843,10 @@ Copyright: Würth Elektronik eiSos</description>
 </errors>
 </schematic>
 </drawing>
+<compatibility>
+<note version="6.3" minversion="6.2.2" severity="warning">
+Since Version 6.2.2 text objects can contain more than one line,
+which will not be processed correctly with this version.
+</note>
+</compatibility>
 </eagle>
