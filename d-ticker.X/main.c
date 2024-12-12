@@ -29,6 +29,7 @@
 #include <xc.h>
 
 typedef unsigned char byte;
+typedef unsigned int TCOUNT;
 
 enum {    
     MAX_INPUT_STEPS = 16,
@@ -36,14 +37,22 @@ enum {
     MAX_TRIGS = (MAX_INPUT_STEPS * MAX_OUTPUT_RATE)
 };
 
-float tt[MAX_TRIGS];
-
-float g_trig[MAX_TRIGS];
+int tt[MAX_TRIGS];
+TCOUNT g_trig[MAX_TRIGS];
 int g_num_trigs;
 int e_num_input_steps;
 int e_output_rate;
 int g_trigs_per_section;
 
+
+volatile byte pot_mov_detect;
+volatile byte pot_mov_done;
+volatile int pot_mov_timeout;
+
+enum {
+    POT_MOV_THRESHOLD = 1,
+    POT_MOV_TIMEOUT = 200
+};
 enum {
     INPUT_STEPS_4,
     INPUT_STEPS_8,
@@ -126,22 +135,12 @@ volatile byte ms_tick = 0;				// once per millisecond tick flag used to synchron
 volatile byte pot[NUM_POTS] = {0};
 volatile int which_pot = 0;
 
-#define DEBOUNCE_CLOCK_IN 10
-volatile byte debounce_clock_in = 0;
-volatile byte prev_clock_in = 0;
-volatile byte clock_in_signal = 0;
-
-#define DEBOUNCE_RESET_IN 10
-volatile byte debounce_reset_in = 0;
-volatile byte prev_reset_in = 0;
-volatile byte reset_in_signal = 0;
-
 #define CLOCK_LED_TIMEOUT 10
 volatile byte clock_led_timeout = 0;
 
 #define OUTPUT_PULSE_MS 10
 #define OUTPUT_PULSE_LOW_MS 5
-volatile byte trig_out_count = 0;
+volatile byte trig_out_count = 0;   // number of trigger pulses to generate
 volatile byte trig_out_timeout = 0;
 
 
@@ -175,37 +174,14 @@ void __interrupt() ISR()
 	{
 		TMR0 = TIMER_0_INIT_SCALAR;
 		ms_tick = 1;
-		
-		// poll the clock input
-		if(debounce_clock_in) {
-			--debounce_clock_in;
-		}
-		else if(P_EXTCLOCK) {
-			if(!prev_clock_in) {
-				prev_clock_in = 1;
-				clock_in_signal = 1;
-				debounce_clock_in = DEBOUNCE_CLOCK_IN;
-			}
-		}
-		else {
-			prev_clock_in = 0;
-		}
-		
-		// poll the reset input
-		if(debounce_reset_in) {
-			--debounce_reset_in;
-		}
-		else if(P_EXTRESET) {
-			if(!prev_reset_in) {
-				prev_reset_in = 1;
-				reset_in_signal = 1;
-				debounce_reset_in = DEBOUNCE_RESET_IN;
-			}
-		}
-		else {
-			prev_reset_in = 0;
-		}
-		
+
+        // flag the end of potentiometer movement
+        if(pot_mov_timeout) {
+            if(!--pot_mov_timeout) {
+                pot_mov_done = 1;
+            }
+        }
+
 		// manage clock LED
 		if(clock_led_timeout) {
 			if(!--clock_led_timeout) {
@@ -233,9 +209,14 @@ void __interrupt() ISR()
 	// ADC reading complete
     if(PIR1bits.ADIF) {
 	//if(pir1.6) { 
-		pot[which_pot] = ADRESH;
-		if(++which_pot >= NUM_POTS) {
-			which_pot = 0;
+        byte reading = ADRESH;
+        if(abs(reading - pot[which_pot]) > 1) {
+            pot_mov_detect = 1;
+            pot_mov_timeout = 200;
+            pot[which_pot] = reading;            
+        }
+        if(++which_pot >= NUM_POTS) {
+            which_pot = 0;
 		}
 		PIR1bits.ADIF = 0;
 		adc_begin();
@@ -292,13 +273,13 @@ void recalc() {
     
     
     // expand out the velocity(tempo) changes (defined by the pots) into a 
-    // list of velocity values at each output trigger position
-    float cur_rate = 1.0;
-    float min_rate = 1.0;
+    // list of velocity values at each output trigger position    
+    int cur_rate = 128;
+    int min_rate = 128;
     int trig;
     for(trig=0; trig<g_num_trigs; ++trig) {
         tt[trig] = cur_rate;        
-        float acc = (float)(1.0-pot[(trig*4)/g_num_trigs]/128.0);                
+        int acc = 128-pot[(trig*4)/g_num_trigs];
         cur_rate += acc;
         if(cur_rate < min_rate) {
             min_rate = cur_rate;
@@ -307,27 +288,18 @@ void recalc() {
     
     // normalise the velocities so that they are all positive and 
     // expand out the "distance into sequence" by integrating velocity
-    float dist = 0.0;
+    int dist = 0;
     for(trig=0; trig<g_num_trigs; ++trig) {
-        float norm_rate = (float)(tt[trig] - min_rate + 1.0);
+        int norm_rate = tt[trig] - min_rate + 128;
         tt[trig] = dist;
         dist = dist + norm_rate;
     }
     
-    // now normalise the distances so that they run from 0.0 .. 1.0
+    // now normalise the distances so that they run from 0 - 65535
     for(trig=0; trig<g_num_trigs; ++trig) {
-        g_trig[trig] = tt[trig] / dist;
+        g_trig[trig] = (TCOUNT)(((long)65535 * tt[trig]) / dist);
     }
 }
-
-void xrecalc() {
-   g_num_trigs = 16;
-   for(int i=0; i<16; ++i) {
-       g_trig[i] = (float)(i * (1.0/16.0));
-   }
-}
-
-
 
 void test_pots() {
 	for(;;) {
@@ -380,6 +352,12 @@ void main()
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;
 
+    
+    
+    pot_mov_detect = 0;
+    pot_mov_done = 0;
+    pot_mov_timeout = 0;
+
 	// poll pots
 	adc_begin();
 	
@@ -392,19 +370,17 @@ void main()
     
     int led_count = 0;
     int cur_trig = 0;
-    float timer = 0.0;
-    float rate = 1.0/8000.0;    
-    int refresh_count = 0;
+    TCOUNT timer = 0;
+    TCOUNT rate = 8;    
 	for(;;) {
         if(ms_tick) {
             ms_tick = 0;
-            if(!refresh_count) {
+            if(pot_mov_done) {
+                P_CLOCKLED = 1;
                 recalc();
-                refresh_count = 1000;
+                P_CLOCKLED = 0;
+                pot_mov_done = 0;
             }
-            --refresh_count;
-                //recalc();
-            //}            
             while(cur_trig<g_num_trigs) {
                 if(g_trig[cur_trig] > timer) {
                     break;
@@ -415,14 +391,12 @@ void main()
                 ++cur_trig;
             }
             timer += rate;
-            if(timer >= 1.0) {
-                timer = 0.0;
+            if(timer <= rate) {
                 cur_trig = 0;
             }
-            
             if(led_count) {
                 if(!--led_count) {
-                    P_CLOCKLED = 0;
+                    //P_CLOCKLED = 0;
                     set_led(-1);
                 }
             }
