@@ -28,7 +28,7 @@ static void recalc() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-inline void clk_ms() {
+inline void clk_ms_isr() {
     ++clk.cur_ms;
     if(clk.ext_clk_present) {
         // running on external clock... tick along at the appropriate
@@ -58,11 +58,11 @@ inline void clk_ms() {
 }
 //////////////////////////////////////////////////////////
 // called when a clock pulse is received
-void clk_ext_pulse() {
+void clk_ext_pulse_isr() {
     if(!clk.ext_clk_present) {
         // we were on internal clock, so switch to external
         // clock and restart the sequence
-        clk_reset();
+        clk_reset_isr();
     }
     else {
         clk.ticks_at_next_pulse += clk.ticks_per_pulse;
@@ -86,10 +86,10 @@ void clk_init() {
     clk.ext_clk_present = 0; // start on internal clock
     clk.event = 0;
     recalc();
-    clk_reset();
+    clk_reset_isr();
 }
 //////////////////////////////////////////////////////////
-void clk_reset() {
+void clk_reset_isr() {
     clk.cur_ticks = 0.0;
     clk.cur_pulse = 0;
     clk.cur_ms = 0;
