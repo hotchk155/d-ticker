@@ -27,9 +27,8 @@
 // Use project enums instead of #define for ON and OFF.
 
 #include <xc.h>
+#include "d-ticker.h"
 
-typedef unsigned char byte;
-typedef unsigned int TCOUNT;
 
 enum {    
     MAX_INPUT_STEPS = 16,
@@ -48,6 +47,9 @@ int g_trigs_per_section;
 volatile byte pot_mov_detect;
 volatile byte pot_mov_done;
 volatile int pot_mov_timeout;
+
+volatile byte ext_clock_edge;
+volatile byte ext_reset_edge;
 
 enum {
     POT_MOV_THRESHOLD = 1,
@@ -70,10 +72,10 @@ enum {
 /*
 
 1  VDD
-2  RA5				LED1
+2  RA5				CLOCK_IN        exLED1
 3  RA4/SDO			RESET_IN	
 4  RA3/MCLR#/VPP	SWITCH
-5  RC5/RX			CLOCK_IN
+5  RC5/RX			LED1            exCLOCK_IN
 6  RC4/TX			CLOCK_OUT
 7  RC3/SS#			LED2
 8  RC2				POT1/AN6
@@ -102,23 +104,28 @@ RC2	POT1	AN6
 #define P_CLOCKLED LATAbits.LATA1
 #define P_CLOCKOUT LATCbits.LATC4
 
-#define P_LED1 LATAbits.LATA5
+#define P_LED1 LATCbits.LATC5
 #define P_LED2 LATCbits.LATC3
 #define P_LEDCOM LATAbits.LATA0
 
-#define T_LED1 TRISAbits.TRISA5
+#define T_LED1 TRISCbits.TRISC5
 #define T_LED2 TRISCbits.TRISC3
 #define T_LEDCOM TRISAbits.TRISA0
 
-#define P_EXTCLOCK PORTCbits.RC5
+#define P_EXTCLOCK PORTAbits.RA5
 #define P_EXTRESET PORTAbits.RA4
 #define P_SWITCH PORTAbits.RA3
 
 #define WPUA_BITS 0b00001000
 
+#define IOCAN_BITS 0b00110000
+#define IOCAP_BITS 0b00000000
+#define IOCAF_EXTCLOCK IOCAFbits.IOCAF5
+#define IOCAF_EXTRESET IOCAFbits.IOCAF4
+
 //               76543210
-#define TRIS_A 0b11111100
-#define TRIS_C 0b11100111
+#define TRIS_A 0b11111101
+#define TRIS_C 0b11101111
 
 //
 // MACRO DEFS
@@ -173,6 +180,7 @@ void __interrupt() ISR()
 	if(INTCONbits.T0IF)
 	{
 		TMR0 = TIMER_0_INIT_SCALAR;
+        clk_ms();
 		ms_tick = 1;
 
         // flag the end of potentiometer movement
@@ -206,9 +214,9 @@ void __interrupt() ISR()
 		INTCONbits.T0IF = 0;
 	}
 	
+    ////////////////////////////////////////////////////////
 	// ADC reading complete
     if(PIR1bits.ADIF) {
-	//if(pir1.6) { 
         byte reading = ADRESH;
         if(abs(reading - pot[which_pot]) > 1) {
             pot_mov_detect = 1;
@@ -221,8 +229,27 @@ void __interrupt() ISR()
 		PIR1bits.ADIF = 0;
 		adc_begin();
 	}
+    
+    ////////////////////////////////////////////////////////
+    // detect input from external clock/reset
+    if(INTCONbits.IOCIF) {
+        if(IOCAF_EXTCLOCK){
+            clk_ext_pulse();
+            IOCAF_EXTCLOCK = 0;
+        }
+        if(IOCAF_EXTRESET){
+            clk_reset();
+            IOCAF_EXTRESET = 0;
+        }
+        INTCONbits.IOCIF = 0;
+    }
+
 }
 
+/////////////////////////////////////////////////////////////////////////////
+void trig_out() {
+    ++trig_out_count;
+}
 /////////////////////////////////////////////////////////////////////////////
 // Turn on one of four LEDs by tri-stating 3 lines 
 // 1) LED1->COM
@@ -309,12 +336,10 @@ void test_pots() {
 	}
 }
 
+
 // MAIN
 void main()
 { 
-	// initialise app variables
-	byte tickCount = 0;
-	
 	// osc control / 16MHz / internal
 	OSCCON = 0b01111010;
 
@@ -348,6 +373,13 @@ void main()
 
     PIR1bits.ADIF = 0;
     PIE1bits.ADIE = 1; // enable the ADC interrupt
+
+    // interrupt on change
+    IOCAN = IOCAN_BITS;
+    IOCAP = IOCAP_BITS;
+    INTCONbits.IOCIF = 0;
+    INTCONbits.IOCIE = 1;
+
 	
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;
@@ -358,47 +390,70 @@ void main()
     pot_mov_done = 0;
     pot_mov_timeout = 0;
 
+    ext_clock_edge = 0;
+    ext_reset_edge = 0;
+
 	// poll pots
 	adc_begin();
 	
     
     
- 
-    //e_num_input_steps = INPUT_STEPS_16;
-    //e_output_rate = OUTPUT_RATE_X1;
+    clk_init();
     recalc();
     
     int led_count = 0;
     int cur_trig = 0;
-    TCOUNT timer = 0;
-    TCOUNT rate = 8;    
+    unsigned int pos = 0;
+    int clock_led_count = 0;
 	for(;;) {
+        
         if(ms_tick) {
             ms_tick = 0;
             if(pot_mov_done) {
-                P_CLOCKLED = 1;
                 recalc();
-                P_CLOCKLED = 0;
                 pot_mov_done = 0;
             }
-            while(cur_trig<g_num_trigs) {
-                if(g_trig[cur_trig] > timer) {
-                    break;
-                }
-                set_led((4*cur_trig)/g_num_trigs);
-                //P_CLOCKLED = 1;
-                led_count = 10;
-                ++cur_trig;
+            
+            // blink the clock LED if needed
+            byte event = clk_get_event();
+            if(event & CLK_STEP1) {                    
+                P_CLOCKLED = 1;
+                clock_led_count = 5;
             }
-            timer += rate;
-            if(timer <= rate) {
+            else if(event & CLK_STEP4) {                    
+                P_CLOCKLED = 1;
+                clock_led_count = 40;
+            }
+            
+            unsigned int new_pos = clk_get_pos();
+            if(event & CLK_RESET) { // reset signal
+                // reset the pattern ignoring remaining trigs
                 cur_trig = 0;
             }
-            if(led_count) {
-                if(!--led_count) {
-                    //P_CLOCKLED = 0;
-                    set_led(-1);
+            else if(new_pos < pos) { // wrap around to start of pattern
+                // send any remaining triggers
+                while(cur_trig++<g_num_trigs) {                   
+                    trig_out();
+                }                
+                cur_trig = 0;
+            }
+            pos = new_pos;
+                        
+            while(cur_trig<g_num_trigs) {
+                if(g_trig[cur_trig] > pos) {
+                    break;
                 }
+                ++cur_trig;
+                trig_out();
+                set_led((4*cur_trig)/g_num_trigs);
+                led_count = 10;
+            }
+            
+            if(led_count && !--led_count) {
+                set_led(-1);
+            }
+            if(clock_led_count && !--clock_led_count) {
+                P_CLOCKLED = 0;
             }
         }
 	}

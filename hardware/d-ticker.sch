@@ -17157,6 +17157,8 @@ Copyright: Würth Elektronik eiSos</description>
 <text x="-35.56" y="0" size="6.35" layer="97">SCHMITT 
 TRIGGER
 INPUT</text>
+<text x="91.44" y="76.2" size="6.35" layer="97">MOVE CLOCK IN TO RA5 TO ALLOW IOC
+MOVE LED1 TO RC5</text>
 </plain>
 <instances>
 <instance part="IC1" gate="G$1" x="142.24" y="99.06"/>
