@@ -29,14 +29,12 @@
 #include <xc.h>
 #include "d-ticker.h"
 
-
 /*
-
 1  VDD
-2  RA5				CLOCK_IN        exLED1
+2  RA5				CLOCK_IN        
 3  RA4/SDO			RESET_IN	
 4  RA3/MCLR#/VPP	SWITCH
-5  RC5/RX			LED1            exCLOCK_IN
+5  RC5/RX			LED1            
 6  RC4/TX			CLOCK_OUT
 7  RC3/SS#			LED2
 8  RC2				POT1/AN6
@@ -53,32 +51,16 @@ RC1	POT2	AN5
 RC2	POT1	AN6
 */
 
-//
-// TYPE DEFS
-//
-//typedef unsigned char byte;
-
-
-
-#define P_EXTCLOCK PORTAbits.RA5
-#define P_EXTRESET PORTAbits.RA4
-
-#define WPUA_BITS 0b00001000
-
-#define IOCAN_BITS 0b00110000
-#define IOCAP_BITS 0b00010000
+//                    76543210
+#define TRIS_A      0b11111101
+#define TRIS_C      0b11101111
+#define WPUA_BITS   0b00001000
+#define IOCAN_BITS  0b00110000
+#define IOCAP_BITS  0b00010000
 #define IOCAF_EXTCLOCK IOCAFbits.IOCAF5
 #define IOCAF_EXTRESET IOCAFbits.IOCAF4
-
-//               76543210
-#define TRIS_A 0b11111101
-#define TRIS_C 0b11101111
-
-//
-// MACRO DEFS
-//
-
-// Timer related stuff
+#define P_EXTCLOCK PORTAbits.RA5
+#define P_EXTRESET PORTAbits.RA4
 #define TIMER_0_INIT_SCALAR		5		// Timer 0 initialiser to overlow at 1ms intervals
 
 ////////////////////////////////////////////////////////////
@@ -120,18 +102,7 @@ void __interrupt() ISR()
 
 }
 
-
-
-//void test_pots() {
-	//for(;;) {
-//		int j = pots_reading(3);
-//		set_led(j/64);
-//		//set_led(0);
-//	}
-//}
-
-
-// MAIN
+////////////////////////////////////////////////////////////
 void main()
 { 
 	// osc control / 16MHz / internal
@@ -173,7 +144,6 @@ void main()
     IOCAP = IOCAP_BITS;
     INTCONbits.IOCIF = 0;
     INTCONbits.IOCIE = 1;
-
 	
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;

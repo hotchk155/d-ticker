@@ -5,25 +5,42 @@ typedef unsigned char byte;
 
 
 
-
-
+enum {
+    INPUT_STEPS_4,
+    INPUT_STEPS_8,
+    INPUT_STEPS_16,
+    INPUT_STEPS_32
+};
+enum {
+    OUTPUT_RATE_DIV2,
+    OUTPUT_RATE_X1,
+    OUTPUT_RATE_X2,
+    OUTPUT_RATE_X4
+};
+enum {
+    RESET_MODE_RESTART,
+    RESET_MODE_ONE_SHOT,
+    RESET_MODE_RUN,
+    RESET_MODE_RESTART_RUN
+};
 enum {    
     MAX_INPUT_STEPS = 16,
     MAX_OUTPUT_RATE = 4,
     MAX_TRIGS = (MAX_INPUT_STEPS * MAX_OUTPUT_RATE)
 };
-
 enum {
     CLK_STEP1 = 0x01,
     CLK_STEP4 = 0x02,
     CLK_RESTART = 0x04
 };
 enum {
+    TINY_LED_BLINK_MS = 1,
     SHORT_LED_BLINK_MS = 5,
     MED_LED_BLINK_MS = 30,
     LONG_LED_BLINK_MS = 50
 };
 
+////////////////////////////////////////////////////////////////////////////////
 inline void clk_ms_isr(void);
 inline void clk_ext_pulse_isr(void);
 void clk_restart(void);
@@ -53,8 +70,8 @@ byte pots_mov_done(void);
 void leds_init(void);
 inline void leds_ms_isr(void);
 inline void leds_set_clock(byte state, byte timeout);
-inline void leds_clear_pos(void);
 inline void leds_set_pos(byte which, byte timeout);
+inline void leds_clear_pos(void);
 
 ///////////////////////////////////////////////////////////////////////////////
 void out_init(void);
@@ -66,6 +83,7 @@ void ui_init(void);
 void ui_run(void);
 void ui_trig(byte which);
 
+////////////////////////////////////////////////////////////////////////////////
 void seq_init(void);
 void seq_reset_signal_isr(byte reset_signal);
 void seq_run(void);

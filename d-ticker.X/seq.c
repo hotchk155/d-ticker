@@ -2,17 +2,61 @@
 #include "d-ticker.h"
 
 static struct {
+    byte reset_mode;
     byte reset_signal;
+    byte output_enabled;
 } seq;
 
-void seq_init() {
+////////////////////////////////////////////////////////////////////////////////
+void seq_init() {    
+    seq.reset_mode = RESET_MODE_RESTART;
     seq.reset_signal = 0;
+    seq.output_enabled = 1;
 }
 
+////////////////////////////////////////////////////////////////////////////////
 void seq_reset_signal_isr(byte reset_signal) {
-    seq.reset_signal = reset_signal;    
+    seq.reset_signal = reset_signal;
+    if(reset_signal) { // rising edge
+        seq.output_enabled = 1;
+        switch(seq.reset_mode){
+            case RESET_MODE_RESTART:
+            case RESET_MODE_ONE_SHOT:
+            case RESET_MODE_RESTART_RUN:
+                clk_restart();
+                break;
+            case RESET_MODE_RUN:
+                break;
+        }
+    }
+    else {
+        switch(seq.reset_mode){
+            case RESET_MODE_RESTART:
+            case RESET_MODE_ONE_SHOT:
+                break;
+            case RESET_MODE_RESTART_RUN:
+            case RESET_MODE_RUN:
+                seq.output_enabled = 0;
+                break;
+        }        
+    }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+void seq_set_reset_mode(byte reset_mode) {
+    seq.reset_mode = reset_mode;
+    switch(seq.reset_mode){
+        case RESET_MODE_RESTART:
+        case RESET_MODE_ONE_SHOT:
+            break;
+        case RESET_MODE_RESTART_RUN:
+        case RESET_MODE_RUN:
+            seq.output_enabled = seq.reset_signal;
+            break;
+    }        
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void seq_run() {
     pat_recalc();
     
@@ -52,8 +96,13 @@ void seq_run() {
                 break;
             }
             ++cur_trig;
-            out_trig(); 
-            ui_trig((byte)((4*cur_trig)/pat_get_num_trigs()));
+            if(seq.output_enabled) {
+                out_trig(); 
+                leds_set_pos((byte)((4*cur_trig)/pat_get_num_trigs()), SHORT_LED_BLINK_MS);     
+            }
+            else {
+                leds_set_pos((byte)((4*cur_trig)/pat_get_num_trigs()), TINY_LED_BLINK_MS);                     
+            }
         }
 	}
 }
