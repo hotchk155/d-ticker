@@ -6,7 +6,7 @@ const double MAX_EXT_PERIOD_MS = 3000.0;
 struct {
     int bpm;                            // total number of pulses in the pattern
     int num_pulses;                     // total number of pulses in the pattern    
-    int cur_pulse;                      // 
+//    int cur_pulse;                      // 
     
     double cur_ticks;            // the current running tick count
     double ticks_at_next_pulse;  // the number of ticks at the next pulse
@@ -18,14 +18,9 @@ struct {
 
     byte restart_at_next_pulse;
     byte ext_clk_present;
-    byte event; 
+    byte is_pulse; 
+    byte is_restart;
 } clk;
-/*
-    RESET_MODE_RESTART,
-    RESET_MODE_ONE_SHOT,
-    RESET_MODE_RUN,
-    RESET_MODE_RESTART_RUN
-*/
 //////////////////////////////////////////////////////////
 static void recalc() {
     clk.ticks_per_pulse = MAX_TICKS/clk.num_pulses;
@@ -36,10 +31,9 @@ static void recalc() {
 //////////////////////////////////////////////////////////
 static void restart() {
     clk.cur_ticks = 0.0;
-    clk.cur_pulse = 0;
     clk.cur_ms = 0;
     clk.ticks_at_next_pulse = clk.ticks_per_pulse;                
-    clk.event |= CLK_RESTART|CLK_STEP4;
+    clk.is_restart = 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,19 +53,17 @@ inline void clk_ms_isr() {
         clk.cur_ticks += clk.ticks_per_ms;
         if(clk.cur_ticks >= MAX_TICKS) {
             clk.cur_ticks -= MAX_TICKS;
-            clk.cur_pulse = 0;
             clk.ticks_at_next_pulse = clk.ticks_per_pulse;
-            clk.event |= CLK_STEP4;
+            clk.is_pulse = 1;
         }
         else if(clk.cur_ticks >= clk.ticks_at_next_pulse) {
             if(clk.restart_at_next_pulse) {
                 restart();
             }
             else {
-                ++clk.cur_pulse;
                 clk.ticks_at_next_pulse += clk.ticks_per_pulse;
-                clk.event |= ((clk.cur_pulse%4)? CLK_STEP1:CLK_STEP4);
             }
+            clk.is_pulse = 1;
         }
     }
 }
@@ -91,9 +83,8 @@ inline void clk_ext_pulse_isr() {
     }
     else {
         clk.ticks_at_next_pulse += clk.ticks_per_pulse;
-        ++clk.cur_pulse;
     }
-    clk.event |= ((clk.cur_pulse%4)? CLK_STEP1:CLK_STEP4);
+    clk.is_pulse = 1;
     
     if(clk.last_ext_ms) {
         double ms_per_pulse = (clk.cur_ms - clk.last_ext_ms);
@@ -110,7 +101,8 @@ void clk_init() {
     clk.bpm = 120;
     clk.num_pulses = 16;    
     clk.ext_clk_present = 0; // start on internal clock
-    clk.event = 0;
+    clk.is_pulse = 0;
+    clk.is_restart = 0;
     recalc();
     restart();
 }
@@ -127,27 +119,24 @@ inline unsigned int clk_get_pos() {
 }
 
 //////////////////////////////////////////////////////////
-inline byte clk_get_event() {
-    byte event = clk.event;
-    clk.event = 0;
+inline byte clk_event() {
+    byte event = 
+            clk.is_restart ? CLK_RESTART : 
+            (clk.is_pulse ? CLK_PULSE : 0);
+    clk.is_pulse = 0;
+    clk.is_restart = 0;
     return event;
 }
 
 //////////////////////////////////////////////////////////
-void clk_set_internal() {
-    clk.ext_clk_present = 0;    
+void clk_set_num_pulses(int num_pulses) {
+    clk.num_pulses = num_pulses;
     recalc();
 }
-
-//////////////////////////////////////////////////////////
-void clk_set_length(int length) {
-    clk.num_pulses = length;
-    recalc();
-}
-
 
 //////////////////////////////////////////////////////////
 void clk_set_bpm(int bpm) {
     clk.bpm = bpm;    
+    clk.ext_clk_present = 0;    
     recalc();    
 }

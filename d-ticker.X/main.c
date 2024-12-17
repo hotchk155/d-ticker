@@ -76,6 +76,7 @@ void __interrupt() ISR()
         clk_ms_isr();
         pots_ms_isr();
         leds_ms_isr();
+        ui_ms_isr();
         INTCONbits.T0IF = 0;
 	}
 	

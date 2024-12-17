@@ -15,9 +15,9 @@ struct {
     volatile byte reading[POTS_COUNT];
     volatile byte cur_pot;
     volatile byte scan_complete;
-    volatile byte mov_detect;
-    volatile byte mov_done;
-    volatile int mov_timeout;    
+    volatile byte last_moved;
+    volatile byte move_pending;
+    volatile int move_timeout;    
 } pots;
 
 
@@ -45,8 +45,9 @@ static void read_next() {
 void pots_read_isr() {
     byte reading = ADRESH;
     if(abs(reading - pots.reading[pots.cur_pot]) >= POTS_MOVE_TOLERANCE) {
-        pots.mov_detect = 1;
-        pots.mov_timeout = POTS_MOVE_TIMEOUT;
+        pots.last_moved = pots.cur_pot;
+        pots.move_timeout = POTS_MOVE_TIMEOUT;
+        pots.move_pending = 1;
         pots.reading[pots.cur_pot] = reading;            
     }
     if(++pots.cur_pot >= POTS_COUNT) {
@@ -63,15 +64,15 @@ void pots_init() {
     read_next();
     while(!pots.scan_complete); // wait for first read of pots
     
-    pots.mov_detect = 0;
-    pots.mov_done = 0;
-    pots.mov_timeout = 0;   
+    pots.last_moved = 0;
+    pots.move_pending = 0;
+    pots.move_timeout = 0;   
 }
 ////////////////////////////////////////////////////////////////////////////////
 inline void pots_ms_isr() {
-    if(pots.mov_timeout) {
-        if(!--pots.mov_timeout) {
-            pots.mov_done = 1;
+    if(pots.move_timeout) {
+        if(!--pots.move_timeout) {
+            pots.move_pending = 0;
         }
     }
 }
@@ -80,14 +81,10 @@ inline byte pots_reading(int which) {
     return pots.reading[which];
 }
 ////////////////////////////////////////////////////////////////////////////////
-byte pots_mov_detect() {
-    byte mov_detect = pots.mov_detect;
-    pots.mov_detect = 0;
-    return mov_detect;
+inline byte pots_last_moved() {
+    return pots.last_moved;
 }
 ////////////////////////////////////////////////////////////////////////////////
-byte pots_mov_done() {
-    byte mov_done = pots.mov_done;
-    pots.mov_done = 0;
-    return mov_done;
+inline byte pots_move_pending() {
+    return pots.move_pending;
 }
