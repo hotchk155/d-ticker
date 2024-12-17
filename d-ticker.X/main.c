@@ -29,40 +29,15 @@
 #include <xc.h>
 #include "d-ticker.h"
 
+static struct { 
+    byte reset_signal;
+} dt;
 
 enum {    
     MAX_INPUT_STEPS = 16,
     MAX_OUTPUT_RATE = 4,
     MAX_TRIGS = (MAX_INPUT_STEPS * MAX_OUTPUT_RATE)
 };
-
-
-
-
-enum {
-    INPUT_STEPS_4,
-    INPUT_STEPS_8,
-    INPUT_STEPS_16,
-    INPUT_STEPS_32
-};
-enum {
-    OUTPUT_RATE_DIV2,
-    OUTPUT_RATE_X1,
-    OUTPUT_RATE_X2,
-    OUTPUT_RATE_X4
-};
-enum {
-    SHORT_LED_BLINK_MS = 5,
-    MED_LED_BLINK_MS = 30,
-    LONG_LED_BLINK_MS = 50
-};
-
-volatile byte ms_tick = 0;				// once per millisecond tick flag used to synchronise stuff
-
-
-
-
-
 
 ////////////////////////////////////////////////////////////
 void __interrupt() ISR()
@@ -73,7 +48,6 @@ void __interrupt() ISR()
 	if(INTCONbits.T0IF)
 	{
 		TMR0 = TIMER_0_INIT_SCALAR;
-		ms_tick = 1;
         out_ms_isr();
         clk_ms_isr();
         pots_ms_isr();
@@ -96,7 +70,12 @@ void __interrupt() ISR()
             IOCAF_EXTCLOCK = 0;
         }
         if(IOCAF_EXTRESET){
-            clk_reset_isr();
+            if(P_EXTRESET) {
+                dt.reset_signal = 0;
+            }
+            else {
+                dt.reset_signal = 1;
+            }
             IOCAF_EXTRESET = 0;
         }
         INTCONbits.IOCIF = 0;
@@ -135,7 +114,7 @@ void main()
     // ADC clock is Fosc/32
     // Result left justified (8 bit value in adresh register)
     // Voltage reference is power supply (VDD)
-        ADCON1=0b00100000; //fOSC/32
+    ADCON1=0b00100000; //fOSC/32
 	// Configure timer 0 (controls systemticks)
 	// 	timer 0 runs at 4MHz
 	// 	prescaled 1/16 = 250kHz
@@ -162,59 +141,56 @@ void main()
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;
 
-    
-    
-	// poll pots
     out_init();
     leds_init();
     clk_init();
     pat_init();
     pots_init();   
+    ui_init();
+    
     pat_recalc();
     
+    dt.reset_signal = 0;
+    
+    // main application loop
     int cur_trig = 0;
     unsigned int pos = 0;
 	for(;;) {
         
-        if(ms_tick) {
-            ms_tick = 0;
-            if(pots_mov_done()) {
-                pat_recalc();
+        // run the UI
+        ui_run();
+        
+        // get the updated clock position
+        unsigned int new_pos = clk_get_pos();
+        byte event = clk_get_event();
+        if(event & CLK_STEP4) {                    
+            P_CLOCKLED = 1;
+            leds_set_clock(1, MED_LED_BLINK_MS);
+        }
+        else if(event & CLK_STEP1) {                    
+            leds_set_clock(1, SHORT_LED_BLINK_MS);
+        }
+        if(event & CLK_RESTART) { // reset signal
+            // reset the pattern ignoring remaining trigs
+            cur_trig = 0;
+        }            
+        else if(new_pos < pos) { // wrap around to start of pattern
+            // send any remaining triggers
+            while(cur_trig++ < pat_get_num_trigs()) {                   
+                out_trig();
+            }                
+            cur_trig = 0;
+        }
+        pos = new_pos;
+
+        
+        while(cur_trig < pat_get_num_trigs()) {
+            if(pat_get_trig(cur_trig) > pos) {
+                break;
             }
-            
-            // blink the clock LED if needed
-            byte event = clk_get_event();
-            if(event & CLK_STEP4) {                    
-                P_CLOCKLED = 1;
-                leds_set_clock(1, MED_LED_BLINK_MS);
-            }
-            else if(event & CLK_STEP1) {                    
-                leds_set_clock(1, SHORT_LED_BLINK_MS);
-            }
-            
-            unsigned int new_pos = clk_get_pos();
-            if(event & CLK_RESET) { // reset signal
-                // reset the pattern ignoring remaining trigs
-                cur_trig = 0;
-            }            
-            else if(new_pos < pos) { // wrap around to start of pattern
-                // send any remaining triggers
-                while(cur_trig++ < pat_get_num_trigs()) {                   
-                    out_trig();
-                }                
-                cur_trig = 0;
-            }
-            pos = new_pos;
-                        
-            while(cur_trig < pat_get_num_trigs()) {
-                if(pat_get_trig(cur_trig) > pos) {
-                    break;
-                }
-                ++cur_trig;
-                out_trig(); 
-                leds_set_pos((byte)((4*cur_trig)/pat_get_num_trigs()),SHORT_LED_BLINK_MS); 
-            }
-            
+            ++cur_trig;
+            out_trig(); 
+            ui_trig((byte)((4*cur_trig)/pat_get_num_trigs()));
         }
 	}
 }

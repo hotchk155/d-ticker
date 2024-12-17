@@ -51,7 +51,7 @@ RC2	POT1	AN6
 #define WPUA_BITS 0b00001000
 
 #define IOCAN_BITS 0b00110000
-#define IOCAP_BITS 0b00000000
+#define IOCAP_BITS 0b00010000
 #define IOCAF_EXTCLOCK IOCAFbits.IOCAF5
 #define IOCAF_EXTRESET IOCAFbits.IOCAF4
 
@@ -71,25 +71,47 @@ typedef unsigned char byte;
 
 
 
+enum {
+    INPUT_STEPS_4,
+    INPUT_STEPS_8,
+    INPUT_STEPS_16,
+    INPUT_STEPS_32
+};
+enum {
+    OUTPUT_RATE_DIV2,
+    OUTPUT_RATE_X1,
+    OUTPUT_RATE_X2,
+    OUTPUT_RATE_X4
+};
+enum {
+    RESET_MODE_RESTART,
+    RESET_MODE_ONE_SHOT,
+    RESET_MODE_RUN,
+    RESET_MODE_RESTART_RUN
+};
 
 enum {
     CLK_STEP1 = 0x01,
     CLK_STEP4 = 0x02,
-    CLK_RESET = 0x04
+    CLK_RESTART = 0x04
+};
+enum {
+    SHORT_LED_BLINK_MS = 5,
+    MED_LED_BLINK_MS = 30,
+    LONG_LED_BLINK_MS = 50
 };
 
 inline void clk_ms_isr(void);
-void clk_ext_pulse_isr(void);
+inline void clk_ext_pulse_isr(void);
+void clk_restart(void);
 void clk_init(void);
-void clk_reset_isr(void);
 inline unsigned int clk_get_pos(void);
 inline byte clk_get_event(void);
 void clk_set_internal(void);
 void clk_set_length(int length);
-int clk_get_length(void);
 void clk_set_bpm(int bpm);
-int clk_get_bpm(void);
 
+////////////////////////////////////////////////////////////////////////////////
 void pat_set_num_trigs(int num_trigs);
 inline int pat_get_num_trigs(void);
 inline unsigned int pat_get_trig(int pos);
@@ -111,11 +133,15 @@ inline void leds_set_clock(byte state, byte timeout);
 inline void leds_clear_pos(void);
 inline void leds_set_pos(byte which, byte timeout);
 
-
 ///////////////////////////////////////////////////////////////////////////////
 void out_init(void);
 inline void out_ms_isr(void);
 void out_trig(void);
+
+///////////////////////////////////////////////////////////////////////////////
+void ui_init(void);
+void ui_run(void);
+void ui_trig(byte which);
 
 #endif	/* D_TICKER_H */
 

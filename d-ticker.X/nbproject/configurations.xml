@@ -19,6 +19,7 @@
       <itemPath>pots.c</itemPath>
       <itemPath>leds.c</itemPath>
       <itemPath>output.c</itemPath>
+      <itemPath>ui.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

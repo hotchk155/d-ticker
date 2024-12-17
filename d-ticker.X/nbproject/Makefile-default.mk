@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=clock.c main.c pattern.c pots.c leds.c output.c
+SOURCEFILES_QUOTED_IF_SPACED=clock.c main.c pattern.c pots.c leds.c output.c ui.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/clock.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/pattern.p1 ${OBJECTDIR}/pots.p1 ${OBJECTDIR}/leds.p1 ${OBJECTDIR}/output.p1
-POSSIBLE_DEPFILES=${OBJECTDIR}/clock.p1.d ${OBJECTDIR}/main.p1.d ${OBJECTDIR}/pattern.p1.d ${OBJECTDIR}/pots.p1.d ${OBJECTDIR}/leds.p1.d ${OBJECTDIR}/output.p1.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/clock.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/pattern.p1 ${OBJECTDIR}/pots.p1 ${OBJECTDIR}/leds.p1 ${OBJECTDIR}/output.p1 ${OBJECTDIR}/ui.p1
+POSSIBLE_DEPFILES=${OBJECTDIR}/clock.p1.d ${OBJECTDIR}/main.p1.d ${OBJECTDIR}/pattern.p1.d ${OBJECTDIR}/pots.p1.d ${OBJECTDIR}/leds.p1.d ${OBJECTDIR}/output.p1.d ${OBJECTDIR}/ui.p1.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/clock.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/pattern.p1 ${OBJECTDIR}/pots.p1 ${OBJECTDIR}/leds.p1 ${OBJECTDIR}/output.p1
+OBJECTFILES=${OBJECTDIR}/clock.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/pattern.p1 ${OBJECTDIR}/pots.p1 ${OBJECTDIR}/leds.p1 ${OBJECTDIR}/output.p1 ${OBJECTDIR}/ui.p1
 
 # Source Files
-SOURCEFILES=clock.c main.c pattern.c pots.c leds.c output.c
+SOURCEFILES=clock.c main.c pattern.c pots.c leds.c output.c ui.c
 
 
 
@@ -142,6 +142,14 @@ ${OBJECTDIR}/output.p1: output.c  nbproject/Makefile-${CND_CONF}.mk
 	@-${MV} ${OBJECTDIR}/output.d ${OBJECTDIR}/output.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/output.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
+${OBJECTDIR}/ui.p1: ui.c  nbproject/Makefile-${CND_CONF}.mk 
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/ui.p1.d 
+	@${RM} ${OBJECTDIR}/ui.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1  -mdebugger=pickit3   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -O0 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_default=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file  -ginhx32 -Wl,--data-init -mno-keep-startup -mno-osccal -mno-resetbits -mno-save-resetbits -mno-download -mno-stackcall -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto     -o ${OBJECTDIR}/ui.p1 ui.c 
+	@-${MV} ${OBJECTDIR}/ui.d ${OBJECTDIR}/ui.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/ui.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
 else
 ${OBJECTDIR}/clock.p1: clock.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}" 
@@ -190,6 +198,14 @@ ${OBJECTDIR}/output.p1: output.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -O0 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_default=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file  -ginhx32 -Wl,--data-init -mno-keep-startup -mno-osccal -mno-resetbits -mno-save-resetbits -mno-download -mno-stackcall -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto     -o ${OBJECTDIR}/output.p1 output.c 
 	@-${MV} ${OBJECTDIR}/output.d ${OBJECTDIR}/output.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/output.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/ui.p1: ui.c  nbproject/Makefile-${CND_CONF}.mk 
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/ui.p1.d 
+	@${RM} ${OBJECTDIR}/ui.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -O0 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_default=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file  -ginhx32 -Wl,--data-init -mno-keep-startup -mno-osccal -mno-resetbits -mno-save-resetbits -mno-download -mno-stackcall -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto     -o ${OBJECTDIR}/ui.p1 ui.c 
+	@-${MV} ${OBJECTDIR}/ui.d ${OBJECTDIR}/ui.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/ui.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
 endif
 
