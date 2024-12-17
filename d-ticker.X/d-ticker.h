@@ -1,93 +1,16 @@
 #ifndef D_TICKER_H
 #define	D_TICKER_H
 
-/*
-
-1  VDD
-2  RA5				CLOCK_IN        exLED1
-3  RA4/SDO			RESET_IN	
-4  RA3/MCLR#/VPP	SWITCH
-5  RC5/RX			LED1            exCLOCK_IN
-6  RC4/TX			CLOCK_OUT
-7  RC3/SS#			LED2
-8  RC2				POT1/AN6
-9  RC1/SDA/SDI		POT2/AN5
-10 RC0/SCL/SCK		POT3/AN4
-11 RA2/INT			POT4/AN2
-12 RA1/ICPCLK		LED0
-13 RA1/ICPDAT		LED_COM
-14 VSS
-
-RA2	POT4	AN2
-RC0	POT3	AN4
-RC1	POT2	AN5
-RC2	POT1	AN6
-*/
-#define ADCON0_POT4	0b00001001
-#define ADCON0_POT3	0b00010001
-#define ADCON0_POT2	0b00010101
-#define ADCON0_POT1	0b00011001
-
-//
-// TYPE DEFS
-//
-//typedef unsigned char byte;
-
-#define P_CLOCKLED LATAbits.LATA1
-#define P_CLOCKOUT LATCbits.LATC4
-
-#define P_LED1 LATCbits.LATC5
-#define P_LED2 LATCbits.LATC3
-#define P_LEDCOM LATAbits.LATA0
-
-#define T_LED1 TRISCbits.TRISC5
-#define T_LED2 TRISCbits.TRISC3
-#define T_LEDCOM TRISAbits.TRISA0
-
-#define P_EXTCLOCK PORTAbits.RA5
-#define P_EXTRESET PORTAbits.RA4
-#define P_SWITCH PORTAbits.RA3
-
-#define WPUA_BITS 0b00001000
-
-#define IOCAN_BITS 0b00110000
-#define IOCAP_BITS 0b00010000
-#define IOCAF_EXTCLOCK IOCAFbits.IOCAF5
-#define IOCAF_EXTRESET IOCAFbits.IOCAF4
-
-//               76543210
-#define TRIS_A 0b11111101
-#define TRIS_C 0b11101111
-
-//
-// MACRO DEFS
-//
-
-// Timer related stuff
-#define TIMER_0_INIT_SCALAR		5		// Timer 0 initialiser to overlow at 1ms intervals
-
 typedef unsigned char byte;
 
 
 
 
-enum {
-    INPUT_STEPS_4,
-    INPUT_STEPS_8,
-    INPUT_STEPS_16,
-    INPUT_STEPS_32
-};
-enum {
-    OUTPUT_RATE_DIV2,
-    OUTPUT_RATE_X1,
-    OUTPUT_RATE_X2,
-    OUTPUT_RATE_X4
-};
-enum {
-    RESET_MODE_RESTART,
-    RESET_MODE_ONE_SHOT,
-    RESET_MODE_RUN,
-    RESET_MODE_RESTART_RUN
+
+enum {    
+    MAX_INPUT_STEPS = 16,
+    MAX_OUTPUT_RATE = 4,
+    MAX_TRIGS = (MAX_INPUT_STEPS * MAX_OUTPUT_RATE)
 };
 
 enum {
@@ -142,6 +65,10 @@ void out_trig(void);
 void ui_init(void);
 void ui_run(void);
 void ui_trig(byte which);
+
+void seq_init(void);
+void seq_reset_signal_isr(byte reset_signal);
+void seq_run(void);
 
 #endif	/* D_TICKER_H */
 

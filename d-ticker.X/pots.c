@@ -1,6 +1,11 @@
 #include <xc.h>
 #include "d-ticker.h"
 
+#define ADCON0_POT4	0b00001001
+#define ADCON0_POT3	0b00010001
+#define ADCON0_POT2	0b00010101
+#define ADCON0_POT1	0b00011001
+
 enum {
     POTS_COUNT = 4,
     POTS_MOVE_TOLERANCE = 2,

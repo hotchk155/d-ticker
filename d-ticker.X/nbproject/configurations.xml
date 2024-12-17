@@ -20,6 +20,7 @@
       <itemPath>leds.c</itemPath>
       <itemPath>output.c</itemPath>
       <itemPath>ui.c</itemPath>
+      <itemPath>seq.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

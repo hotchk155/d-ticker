@@ -1,6 +1,16 @@
 #include <xc.h>
 #include "d-ticker.h"
 
+#define P_CLOCKLED LATAbits.LATA1
+
+#define P_LED1 LATCbits.LATC5
+#define P_LED2 LATCbits.LATC3
+#define P_LEDCOM LATAbits.LATA0
+
+#define T_LED1 TRISCbits.TRISC5
+#define T_LED2 TRISCbits.TRISC3
+#define T_LEDCOM TRISAbits.TRISA0
+
 struct {
     int clock_timeout;
     int pos_timeout;

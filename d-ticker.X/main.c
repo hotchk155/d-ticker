@@ -29,15 +29,57 @@
 #include <xc.h>
 #include "d-ticker.h"
 
-static struct { 
-    byte reset_signal;
-} dt;
 
-enum {    
-    MAX_INPUT_STEPS = 16,
-    MAX_OUTPUT_RATE = 4,
-    MAX_TRIGS = (MAX_INPUT_STEPS * MAX_OUTPUT_RATE)
-};
+/*
+
+1  VDD
+2  RA5				CLOCK_IN        exLED1
+3  RA4/SDO			RESET_IN	
+4  RA3/MCLR#/VPP	SWITCH
+5  RC5/RX			LED1            exCLOCK_IN
+6  RC4/TX			CLOCK_OUT
+7  RC3/SS#			LED2
+8  RC2				POT1/AN6
+9  RC1/SDA/SDI		POT2/AN5
+10 RC0/SCL/SCK		POT3/AN4
+11 RA2/INT			POT4/AN2
+12 RA1/ICPCLK		LED0
+13 RA1/ICPDAT		LED_COM
+14 VSS
+
+RA2	POT4	AN2
+RC0	POT3	AN4
+RC1	POT2	AN5
+RC2	POT1	AN6
+*/
+
+//
+// TYPE DEFS
+//
+//typedef unsigned char byte;
+
+
+
+#define P_EXTCLOCK PORTAbits.RA5
+#define P_EXTRESET PORTAbits.RA4
+
+#define WPUA_BITS 0b00001000
+
+#define IOCAN_BITS 0b00110000
+#define IOCAP_BITS 0b00010000
+#define IOCAF_EXTCLOCK IOCAFbits.IOCAF5
+#define IOCAF_EXTRESET IOCAFbits.IOCAF4
+
+//               76543210
+#define TRIS_A 0b11111101
+#define TRIS_C 0b11101111
+
+//
+// MACRO DEFS
+//
+
+// Timer related stuff
+#define TIMER_0_INIT_SCALAR		5		// Timer 0 initialiser to overlow at 1ms intervals
 
 ////////////////////////////////////////////////////////////
 void __interrupt() ISR()
@@ -70,12 +112,7 @@ void __interrupt() ISR()
             IOCAF_EXTCLOCK = 0;
         }
         if(IOCAF_EXTRESET){
-            if(P_EXTRESET) {
-                dt.reset_signal = 0;
-            }
-            else {
-                dt.reset_signal = 1;
-            }
+            seq_reset_signal_isr(!P_EXTRESET);
             IOCAF_EXTRESET = 0;
         }
         INTCONbits.IOCIF = 0;
@@ -147,50 +184,8 @@ void main()
     pat_init();
     pots_init();   
     ui_init();
+    seq_init();
     
-    pat_recalc();
+    seq_run();
     
-    dt.reset_signal = 0;
-    
-    // main application loop
-    int cur_trig = 0;
-    unsigned int pos = 0;
-	for(;;) {
-        
-        // run the UI
-        ui_run();
-        
-        // get the updated clock position
-        unsigned int new_pos = clk_get_pos();
-        byte event = clk_get_event();
-        if(event & CLK_STEP4) {                    
-            P_CLOCKLED = 1;
-            leds_set_clock(1, MED_LED_BLINK_MS);
-        }
-        else if(event & CLK_STEP1) {                    
-            leds_set_clock(1, SHORT_LED_BLINK_MS);
-        }
-        if(event & CLK_RESTART) { // reset signal
-            // reset the pattern ignoring remaining trigs
-            cur_trig = 0;
-        }            
-        else if(new_pos < pos) { // wrap around to start of pattern
-            // send any remaining triggers
-            while(cur_trig++ < pat_get_num_trigs()) {                   
-                out_trig();
-            }                
-            cur_trig = 0;
-        }
-        pos = new_pos;
-
-        
-        while(cur_trig < pat_get_num_trigs()) {
-            if(pat_get_trig(cur_trig) > pos) {
-                break;
-            }
-            ++cur_trig;
-            out_trig(); 
-            ui_trig((byte)((4*cur_trig)/pat_get_num_trigs()));
-        }
-	}
 }

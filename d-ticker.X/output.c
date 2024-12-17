@@ -1,6 +1,8 @@
 #include <xc.h>
 #include "d-ticker.h"
 
+#define P_CLOCKOUT LATCbits.LATC4
+
 enum {
     OUTPUT_PULSE_MS = 10,
     OUTPUT_PULSE_LOW_MS = 5
