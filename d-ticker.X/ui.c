@@ -37,7 +37,7 @@ enum {
 
 static const int DEBOUNCE_MS = 20;
 static const int DOUBLE_CLICK_MS = 200;
-static const int POT_MOVE_TIMEOUT_MS = 1000;
+static const int POT_MOVE_TIMEOUT_MS = 200;
 
 static struct {
     volatile byte mode;                      // are we in a "menu"
@@ -122,7 +122,7 @@ void xui_run() {
             // commit the value
             switch(ui.mode) {
                 case UI_NUM_PULSES:
-                    clk_set_num_pulses(num_pulses_menu[option]);
+                    clk_set_num_steps(num_pulses_menu[option]);
                     break;
                 case UI_NUM_TRIGS:
                     pat_set_num_trigs(num_trigs_menu[option]);

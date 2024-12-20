@@ -31,7 +31,7 @@ void seq_reset_signal_isr(byte reset_signal) {
             case RESET_MODE_RESTART:
             case RESET_MODE_ONE_SHOT:
             case RESET_MODE_RESTART_RUN:
-                clk_do_restart();
+                clk_ext_restart_isr();
                 break;
             case RESET_MODE_RUN:
                 break;
@@ -105,7 +105,9 @@ void seq_run() {
  
         int cur_step = clk_get_cur_step();
         if(cur_step != seq.prev_step) {
-            //leds_set_clock(1, (cur_step%4) ? SHORT_LED_BLINK_MS : MED_LED_BLINK_MS);
+            if(!(cur_step%4)) {
+                leds_set_clock(1, MED_LED_BLINK_MS);
+            }
             seq.prev_step = cur_step;
         }
     }

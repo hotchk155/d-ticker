@@ -26,12 +26,15 @@ enum {
 inline void clk_ext_pulse_isr(void);
 inline void clk_ms_isr(void);
 void clk_init(void);
-void clk_do_restart(void);
+inline void clk_ext_restart_isr();
+void clk_manual_restart();
 inline byte clk_is_restart(void);
 inline unsigned int clk_get_cur_pos(void);
 inline int clk_get_cur_step(void);
 void clk_set_num_steps(int num_pulses);
 void clk_set_bpm(int bpm);
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 void pat_set_num_trigs(int num_trigs);
