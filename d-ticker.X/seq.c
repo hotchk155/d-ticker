@@ -82,13 +82,12 @@ void seq_run() {
     }
     // check if the clock has rolled around
     else if(new_pos < seq.prev_pos) {
-        if(seq.output_enabled) {
-            // action any remaining trigs
-            while(seq.cur_trig++ < pat_get_num_trigs()) {                   
-                out_trig();
-            }                
-        }
-        leds_set_clock(1, MED_LED_BLINK_MS);
+        //if(seq.output_enabled) {
+        //    // action any remaining trigs
+        //    while(seq.cur_trig++ < pat_get_num_trigs()) {                   
+        //        out_trig();
+        //    }                
+        //}
         seq.cur_trig = 0;
     }
     else {
@@ -106,7 +105,7 @@ void seq_run() {
         int cur_step = clk_get_cur_step();
         if(cur_step != seq.prev_step) {
             if(!(cur_step%4)) {
-                leds_set_clock(1, MED_LED_BLINK_MS);
+          //      leds_set_clock(1, MED_LED_BLINK_MS);
             }
             seq.prev_step = cur_step;
         }
