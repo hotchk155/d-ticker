@@ -12,8 +12,8 @@
 #define T_LEDCOM TRISAbits.TRISA0
 
 struct {
-    int clock_timeout;
-    int pos_timeout;
+    volatile int clock_timeout;
+    volatile int pos_timeout;
 } leds;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ void leds_init() {
 	T_LEDCOM = 1;
 }
 /////////////////////////////////////////////////////////////////////////////
-inline void leds_ms_isr() {
+inline void leds_run() {
     if(leds.pos_timeout && !--leds.pos_timeout) {
          set_pos_leds(-1);
      }

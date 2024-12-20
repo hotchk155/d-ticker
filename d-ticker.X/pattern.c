@@ -24,7 +24,8 @@ void pat_init() {
     for(int i=0; i<MAX_TRIGS; ++i) {
         pat.trig[i] = 0;
     }
-    pat.num_trigs = 32;
+    pat.num_trigs = 16;
+    pat_recalc();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -60,3 +61,14 @@ void pat_recalc() {
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// Recalculate the tempo map
+/////////////////////////////////////////////////////////////////////////////
+void xpat_recalc() {
+
+    
+    // now normalise the distances so that they run from 0 - 65535
+    for(int i=0; i<pat.num_trigs; ++i) {
+        pat.trig[i] = (unsigned int)((65535.0 *i)/pat.num_trigs);
+    }
+}

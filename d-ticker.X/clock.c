@@ -1,142 +1,140 @@
 #include <xc.h>
 #include "d-ticker.h"
 
-const double MAX_TICKS = 65535.0;
-const double MAX_EXT_PERIOD_MS = 3000.0;
+#define P_CLOCKLED LATAbits.LATA1
+
+
+const unsigned long long MAX_TICKS = ((unsigned long long)1<<32);
+const int MIN_EXT_PERIOD_MS = 100;
+const int MAX_EXT_PERIOD_MS = 3000;
 struct {
     int bpm;                            // total number of pulses in the pattern
-    int num_pulses;                     // total number of pulses in the pattern    
-//    int cur_pulse;                      // 
-    
-    double cur_ticks;            // the current running tick count
-    double ticks_at_next_pulse;  // the number of ticks at the next pulse
-    double ticks_per_pulse;      // increment per ext clock pulse
-    double ticks_per_ms;         // increment per ms to current tick count
-    
-    unsigned long cur_ms;        // 
-    unsigned long last_ext_ms;        // 
-
-    byte restart_at_next_pulse;
-    byte ext_clk_present;
-    byte is_pulse; 
+    unsigned long cur_ticks;
+    unsigned long ticks_per_step;
+    unsigned long ticks_per_ms;
+    unsigned long ticks_at_next_step;
+    unsigned int ms_since_ext_clock;
+    byte pending_restart;
+    byte is_external_clock;
     byte is_restart;
 } clk;
+
+
+
+
 //////////////////////////////////////////////////////////
 static void recalc() {
-    clk.ticks_per_pulse = MAX_TICKS/clk.num_pulses;
-    double ms_per_pulse = ((60.0 * 1000.0)/clk.bpm);    
-    clk.ticks_per_ms = clk.ticks_per_pulse / ms_per_pulse;
+    // calculate the tick increment per ms
+    double ms_per_step = ((60.0 * 1000.0)/clk.bpm);    
+    clk.ticks_per_ms = (unsigned long)(0.5 + clk.ticks_per_step / ms_per_step);    
 }
 
 //////////////////////////////////////////////////////////
-static void restart() {
-    clk.cur_ticks = 0.0;
-    clk.cur_ms = 0;
-    clk.ticks_at_next_pulse = clk.ticks_per_pulse;                
-    clk.is_restart = 1;
+// called by interrupt when a rising ext clock edge is received 
+inline void clk_ext_pulse_isr() {
+    
+    // currently on internal clock?
+    if(!clk.is_external_clock) {
+        // select external clock and flag a restart
+        clk.is_external_clock = 1;
+        clk.pending_restart = 1;
+    }
+    
+    // restart is pending?
+    if(clk.pending_restart) {
+        clk.pending_restart = 0;
+        clk.is_restart = 1;
+        clk.cur_ticks = 0;
+        clk.ticks_at_next_step = clk.ticks_per_step;
+    }
+    else 
+    {
+        // move the "step window" within which the internal
+        // clock can run
+        clk.cur_ticks = clk.ticks_at_next_step;
+        clk.ticks_at_next_step += clk.ticks_per_step;
+        if(clk.ticks_at_next_step < clk.ticks_per_step) {
+            // rollover back to start of bar
+            clk.ticks_at_next_step = 0;
+        }
+
+        // adjust the automatic tick increment to approximate the step rate
+        if(clk.ms_since_ext_clock >= MIN_EXT_PERIOD_MS &&
+           clk.ms_since_ext_clock <= MAX_EXT_PERIOD_MS) {
+            clk.ticks_per_ms = clk.ticks_per_step / clk.ms_since_ext_clock;
+        }        
+    }
+    
+    // get ready to time the interval to the next pulse
+    clk.ms_since_ext_clock = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// called every ms by interrupt
 inline void clk_ms_isr() {
-    ++clk.cur_ms;
-    if(clk.ext_clk_present) {
-        // running on external clock... tick along at the appropriate
-        // rate but do not pass the threshold of the next expected 
-        // clock pulse
-        clk.cur_ticks += clk.ticks_per_ms;
-        if(clk.cur_ticks > clk.ticks_at_next_pulse) {
-            clk.cur_ticks = clk.ticks_at_next_pulse;
+    if(!clk.is_external_clock && clk.pending_restart) {
+        // perform a pending reset 
+        clk.pending_restart = 0;
+        clk.is_restart = 1;
+        clk.cur_ticks = 0;
+    }
+    else 
+    {
+        // otherwise advance the tick counter, noting it will roll over to 0
+        // at the end of the bar
+        unsigned long next_ticks = (clk.cur_ticks + clk.ticks_per_ms); 
+        if(!clk.is_external_clock || (next_ticks < clk.ticks_at_next_step)) {
+            // when on external clock, don't allow advancement past the the 
+            // start of the next step
+            clk.cur_ticks = next_ticks;
         }
     }
-    else {
-        // running on the internal clock
-        clk.cur_ticks += clk.ticks_per_ms;
-        if(clk.cur_ticks >= MAX_TICKS) {
-            clk.cur_ticks -= MAX_TICKS;
-            clk.ticks_at_next_pulse = clk.ticks_per_pulse;
-            clk.is_pulse = 1;
-        }
-        else if(clk.cur_ticks >= clk.ticks_at_next_pulse) {
-            if(clk.restart_at_next_pulse) {
-                restart();
-            }
-            else {
-                clk.ticks_at_next_pulse += clk.ticks_per_pulse;
-            }
-            clk.is_pulse = 1;
-        }
-    }
-}
-
-//////////////////////////////////////////////////////////
-// called when a clock pulse is received
-inline void clk_ext_pulse_isr() {
-    if(!clk.ext_clk_present) {
-        // we were on internal clock, so switch to external
-        // clock and restart the sequence
-        clk.ext_clk_present = 1;
-        restart();
-    }
-    else if(clk.restart_at_next_pulse) {
-        restart();
-        clk.restart_at_next_pulse = 0;
-    }
-    else {
-        clk.ticks_at_next_pulse += clk.ticks_per_pulse;
-    }
-    clk.is_pulse = 1;
-    
-    if(clk.last_ext_ms) {
-        double ms_per_pulse = (clk.cur_ms - clk.last_ext_ms);
-        if(ms_per_pulse > MAX_EXT_PERIOD_MS) {
-            ms_per_pulse = MAX_EXT_PERIOD_MS;
-        }
-        clk.ticks_per_ms = clk.ticks_per_pulse / ms_per_pulse;
-    }
-    clk.last_ext_ms = clk.cur_ms;
+    ++clk.ms_since_ext_clock;
 }
 
 //////////////////////////////////////////////////////////
 void clk_init() {    
     clk.bpm = 120;
-    clk.num_pulses = 16;    
-    clk.ext_clk_present = 0; // start on internal clock
-    clk.is_pulse = 0;
+    clk.cur_ticks = 0;
+    clk.ticks_per_step = 0;
+    clk.ticks_per_ms = 0;
+    clk.ticks_at_next_step = 0;
+    clk.pending_restart = 0;
     clk.is_restart = 0;
-    recalc();
-    restart();
+    clk.is_external_clock = 0;
+    clk.ms_since_ext_clock = 0;
+    clk_set_num_steps(16);
 }
 
 //////////////////////////////////////////////////////////
-void clk_restart() {
-    clk.restart_at_next_pulse = 1;
+void clk_do_restart() {
+    clk.pending_restart = 1;
 }
 
 //////////////////////////////////////////////////////////
-inline unsigned int clk_get_pos() {
-    unsigned long x = (unsigned long)clk.cur_ticks;
-    return(x > 65535)? 65535 : (unsigned int)x;
-}
-
-//////////////////////////////////////////////////////////
-inline byte clk_event() {
-    byte event = 
-            clk.is_restart ? CLK_RESTART : 
-            (clk.is_pulse ? CLK_PULSE : 0);
-    clk.is_pulse = 0;
+inline byte clk_is_restart() {
+    byte is_restart = clk.is_restart;
     clk.is_restart = 0;
-    return event;
+    return is_restart;
+    return 0;
 }
-
 //////////////////////////////////////////////////////////
-void clk_set_num_pulses(int num_pulses) {
-    clk.num_pulses = num_pulses;
+// return value is 0 .. 65535
+inline unsigned int clk_get_cur_pos() {
+    return (unsigned int)(clk.cur_ticks >> 16);
+}
+//////////////////////////////////////////////////////////
+inline int clk_get_cur_step() {
+    return (int)(clk.cur_ticks / clk.ticks_per_step);
+}
+//////////////////////////////////////////////////////////
+void clk_set_num_steps(int num_steps) {
+    clk.ticks_per_step = MAX_TICKS/num_steps;
     recalc();
 }
-
 //////////////////////////////////////////////////////////
 void clk_set_bpm(int bpm) {
     clk.bpm = bpm;    
-    clk.ext_clk_present = 0;    
+    clk.is_external_clock = 0;
     recalc();    
 }

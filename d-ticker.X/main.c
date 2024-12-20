@@ -63,6 +63,7 @@ RC2	POT1	AN6
 #define P_EXTRESET PORTAbits.RA4
 #define TIMER_0_INIT_SCALAR		5		// Timer 0 initialiser to overlow at 1ms intervals
 
+volatile byte ms_tick;
 ////////////////////////////////////////////////////////////
 void __interrupt() ISR()
 {
@@ -72,11 +73,9 @@ void __interrupt() ISR()
 	if(INTCONbits.T0IF)
 	{
 		TMR0 = TIMER_0_INIT_SCALAR;
+        ms_tick = 1;
         out_ms_isr();
         clk_ms_isr();
-        pots_ms_isr();
-        leds_ms_isr();
-        ui_ms_isr();
         INTCONbits.T0IF = 0;
 	}
 	
@@ -134,6 +133,7 @@ void main()
     OPTION_REGbits.PS = 0b011;  // 1/16 prescaler
     OPTION_REGbits.nWPUEN = 0;
     
+    ms_tick = 0;
     INTCONbits.T0IE = 1;    // enabled timer 0 interrrupt
     INTCONbits.T0IF = 0;    // clear interrupt fired flag
 
@@ -152,11 +152,18 @@ void main()
     out_init();
     leds_init();
     clk_init();
-    pat_init();
     pots_init();   
     ui_init();
+    pat_init();
     seq_init();
-    
-    seq_run();
+ 
+    for(;;) {
+        if(ms_tick) {
+            ms_tick = 0;
+            leds_run();
+            ui_run();
+            seq_run();
+        }
+    }
     
 }

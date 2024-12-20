@@ -8,16 +8,13 @@
 
 enum {
     POTS_COUNT = 4,
-    POTS_MOVE_TOLERANCE = 2,
-    POTS_MOVE_TIMEOUT = 200
+    POTS_MOVE_TOLERANCE = 3,
 };
 struct {
     volatile byte reading[POTS_COUNT];
     volatile byte cur_pot;
     volatile byte scan_complete;
-    volatile byte last_moved;
-    volatile byte move_pending;
-    volatile int move_timeout;    
+    volatile int last_moved;
 } pots;
 
 
@@ -46,8 +43,6 @@ void pots_read_isr() {
     byte reading = ADRESH;
     if(abs(reading - pots.reading[pots.cur_pot]) >= POTS_MOVE_TOLERANCE) {
         pots.last_moved = pots.cur_pot;
-        pots.move_timeout = POTS_MOVE_TIMEOUT;
-        pots.move_pending = 1;
         pots.reading[pots.cur_pot] = reading;            
     }
     if(++pots.cur_pot >= POTS_COUNT) {
@@ -64,27 +59,15 @@ void pots_init() {
     read_next();
     while(!pots.scan_complete); // wait for first read of pots
     
-    pots.last_moved = 0;
-    pots.move_pending = 0;
-    pots.move_timeout = 0;   
-}
-////////////////////////////////////////////////////////////////////////////////
-inline void pots_ms_isr() {
-    if(pots.move_timeout) {
-        if(!--pots.move_timeout) {
-            pots.move_pending = 0;
-        }
-    }
+    pots.last_moved = -1;
 }
 ////////////////////////////////////////////////////////////////////////////////
 inline byte pots_reading(int which) {
     return pots.reading[which];
 }
 ////////////////////////////////////////////////////////////////////////////////
-inline byte pots_last_moved() {
-    return pots.last_moved;
-}
-////////////////////////////////////////////////////////////////////////////////
-inline byte pots_move_pending() {
-    return pots.move_pending;
+inline int pots_moved() {
+    int last_moved = pots.last_moved;
+    pots.last_moved = -1;
+    return last_moved;
 }
